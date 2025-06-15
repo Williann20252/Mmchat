@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MMChat - Sala</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #eef2f5;
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      padding: 0;
       display: flex;
       flex-direction: column;
       height: 100vh;
+      background-color: #eef2f5;
     }
 
     header {
@@ -24,15 +23,6 @@
       align-items: center;
     }
 
-    #logoutBtn {
-      background-color: #e74c3c;
-      border: none;
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
     main {
       flex: 1;
       padding: 1rem;
@@ -40,26 +30,37 @@
     }
 
     footer {
-      padding: 1rem;
-      background-color: #f9f9f9;
       display: flex;
+      padding: 1rem;
+      background-color: #fff;
+      border-top: 1px solid #ddd;
       gap: 10px;
     }
 
     input[type="text"] {
       flex: 1;
-      padding: 0.75rem;
-      border-radius: 5px;
+      padding: 12px;
+      border-radius: 6px;
       border: 1px solid #ccc;
+      font-size: 1em;
     }
 
-    button.sendBtn {
-      padding: 0.75rem 1.5rem;
-      border: none;
+    button {
+      padding: 12px 20px;
       background-color: #4a90e2;
+      border: none;
       color: white;
-      border-radius: 5px;
+      border-radius: 6px;
+      font-size: 1em;
       cursor: pointer;
+    }
+
+    .message {
+      background-color: white;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
   </style>
 </head>
@@ -67,24 +68,26 @@
 
   <header>
     <span id="user-info">Carregando...</span>
-    <button id="logoutBtn">Sair</button>
+    <button onclick="logout()">Sair</button>
   </header>
 
-  <main>
-    <h3>Bem-vindo ao MMChat!</h3>
-    <p>Sala de teste ativa. Envie uma mensagem para testar.</p>
+  <main id="chat-container">
+    <div class="message">Bem-vindo ao MMChat! Envie uma mensagem abaixo.</div>
   </main>
 
   <footer>
-    <input type="text" id="mensagem" placeholder="Digite sua mensagem..." />
-    <button class="sendBtn" onclick="enviarMensagem()">Enviar</button>
+    <input type="text" id="mensagem" placeholder="Digite uma mensagem..." />
+    <button onclick="enviarMensagem()">Enviar</button>
   </footer>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
       authDomain: "mmchat-f4f88.firebaseapp.com",
@@ -94,35 +97,37 @@
       appId: "1:404598754438:web:6a0892895591430d851507"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-    // Proteção: só entra se estiver logado
-    auth.onAuthStateChanged((user) => {
+    // Verifica se o usuário está logado
+    onAuthStateChanged(auth, (user) => {
       if (user) {
-        document.getElementById("user-info").textContent = `Usuário: ${user.email || user.uid}`;
+        document.getElementById("user-info").textContent = "Usuário: " + (user.email || user.uid);
       } else {
         window.location.href = "index.html";
       }
     });
 
     // Logout
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      auth.signOut().then(() => {
+    function logout() {
+      signOut(auth).then(() => {
         localStorage.removeItem("uid");
         window.location.href = "index.html";
-      }).catch((error) => {
-        alert("Erro ao sair: " + error.message);
       });
-    });
+    }
 
-    function enviarMensagem() {
+    // Envio de mensagem (por enquanto só mostra no chat)
+    window.enviarMensagem = function() {
       const msg = document.getElementById("mensagem").value;
       if (msg.trim() === "") return;
-      alert("Mensagem enviada: " + msg);
-      document.getElementById("mensagem").value = "";
-    }
-  </script>
 
+      const div = document.createElement("div");
+      div.className = "message";
+      div.textContent = msg;
+      document.getElementById("chat-container").appendChild(div);
+      document.getElementById("mensagem").value = "";
+    };
+  </script>
 </body>
-</html
+</html>
