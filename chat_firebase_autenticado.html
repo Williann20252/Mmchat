@@ -1,0 +1,234 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MMChat - Sala</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f2f2f2;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      background-color: #4a90e2;
+      color: white;
+      padding: 1em;
+      text-align: center;
+      font-size: 1.5em;
+    }
+    #chat {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .message {
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 8px;
+      background-color: white;
+      max-width: 80%;
+    }
+    .premium {
+      background-color: #e8f0ff;
+      border-left: 5px solid gold;
+      font-weight: bold;
+      position: relative;
+    }
+    .premium::before {
+      content: "✔️ ";
+      color: gold;
+      position: absolute;
+      left: -25px;
+    }
+    footer {
+      padding: 10px;
+      background-color: #ddd;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    input[type="text"], input[type="file"] {
+      flex: 1 1 40%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .private-request {
+      background: #fff8e1;
+      border-left: 5px solid orange;
+      padding: 8px;
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+      MMChat
+      <button onclick="window.location.href='logout.html'" style="float:right;background:red;color:white;border:none;border-radius:5px;padding:5px 10px;margin-right:10px;cursor:pointer;">Sair</button>
+    </header>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
+        authDomain: "mmchat-f4f88.firebaseapp.com",
+        projectId: "mmchat-f4f88",
+        storageBucket: "mmchat-f4f88.appspot.com",
+        messagingSenderId: "404598754438",
+        appId: "1:404598754438:web:6a0892895591430d851507"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          alert("Você precisa estar logado.");
+          window.location.href = "login.html";
+        }
+      });
+    </script>
+  <div id="chat"></div>
+
+  <footer>
+    <input type="text" id="nickname" placeholder="Seu nick" />
+    <input type="text" id="destino" placeholder="@nickname destino" />
+    <label><input type="checkbox" id="reservada" /> Reservada</label>
+    <label><input type="checkbox" id="aceitaPV" checked /> Aceitar PV</label>
+    <input type="file" id="imagem" accept="image/*" />
+    <input type="file" id="audioFile" accept="audio/*" />
+    <button onclick="startRecording()">🎙️ Gravar</button>
+    <button onclick="enviar()">Enviar</button>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
+      authDomain: "mmchat-f4f88.firebaseapp.com",
+      databaseURL: "https://mmchat-f4f88-default-rtdb.firebaseio.com",
+      projectId: "mmchat-f4f88",
+      storageBucket: "mmchat-f4f88.appspot.com",
+      messagingSenderId: "404598754438",
+      appId: "1:404598754438:web:6a0892895591430d851507"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const chat = document.getElementById("chat");
+    const autorizadosPV = {};
+    let mediaRecorder;
+    let audioChunks = [];
+
+    function enviar() {
+      const nick = document.getElementById("nickname").value;
+      const destino = document.getElementById("destino").value.trim().replace('@','');
+      const texto = document.getElementById("msg") ? document.getElementById("msg").value : "";
+      const reservada = document.getElementById("reservada").checked;
+      const aceitaPV = document.getElementById("aceitaPV").checked;
+
+      if (!nick || !texto) return;
+
+      if (destino && reservada && !autorizadosPV[destino]) {
+        solicitarAutorizacao(destino, nick);
+        return;
+      }
+
+      const msgObj = {
+        nick,
+        destino,
+        texto,
+        reservada,
+        premium: localStorage.getItem("premium") === "true",
+        timestamp: Date.now()
+      };
+
+      push(ref(db, "mensagens"), msgObj);
+      document.getElementById("msg").value = "";
+    }
+
+    function solicitarAutorizacao(destino, deQuem) {
+      const req = document.createElement("div");
+      req.className = "private-request";
+      req.innerHTML = `@${deQuem} quer enviar mensagem privada para você.
+        <button onclick="aceitar('${deQuem}')">Aceitar</button>
+        <button onclick="recusar(this)">Recusar</button>`;
+      chat.appendChild(req);
+    }
+
+    function aceitar(nick) {
+      autorizadosPV[nick] = true;
+      alert("Você aceitou mensagens privadas de @" + nick);
+    }
+
+    function recusar(btn) {
+      btn.parentElement.remove();
+    }
+
+    function startRecording() {
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        mediaRecorder.ondataavailable = e => {
+          audioChunks.push(e.data);
+        };
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+          const audioURL = URL.createObjectURL(audioBlob);
+          const msg = document.createElement("div");
+          msg.classList.add("message");
+          msg.innerHTML = "<strong>Áudio gravado:</strong><br>";
+          const audio = document.createElement("audio");
+          audio.controls = true;
+          audio.src = audioURL;
+          msg.appendChild(audio);
+          chat.appendChild(msg);
+        };
+        mediaRecorder.start();
+        setTimeout(() => mediaRecorder.stop(), 10000);
+      });
+    }
+
+    window.onload = () => {
+      const msgInput = document.createElement("input");
+      msgInput.id = "msg";
+      msgInput.type = "text";
+      msgInput.placeholder = "Digite sua mensagem...";
+      document.querySelector("footer").prepend(msgInput);
+
+      onChildAdded(ref(db, "mensagens"), (snapshot) => {
+        const data = snapshot.val();
+        const meuNick = document.getElementById("nickname").value;
+
+        if (!data.reservada || data.destino === meuNick) {
+          const msg = document.createElement("div");
+          msg.classList.add("message");
+          if (data.premium) msg.classList.add("premium");
+
+          msg.innerHTML = `<strong>${data.nick}</strong>: ${data.destino ? `<em>para @${data.destino}</em> ` : ''}${data.reservada ? '<em>(reservada)</em> ' : ''}${data.texto}`;
+          chat.appendChild(msg);
+          chat.scrollTop = chat.scrollHeight;
+        }
+      });
+    };
+  </script>
+</body>
+</html>

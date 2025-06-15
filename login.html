@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MMChat - Login</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .login-box {
+      background-color: white;
+      padding: 2em;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    h2 {
+      text-align: center;
+      color: #4a90e2;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .status {
+      text-align: center;
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>MMChat - Login</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="senha" placeholder="Senha">
+    <button onclick="login()">Entrar</button>
+    <button onclick="registrar()">Registrar</button>
+    <div class="status" id="status"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
+      authDomain: "mmchat-f4f88.firebaseapp.com",
+      projectId: "mmchat-f4f88",
+      storageBucket: "mmchat-f4f88.appspot.com",
+      messagingSenderId: "404598754438",
+      appId: "1:404598754438:web:6a0892895591430d851507"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    function login() {
+      const email = document.getElementById('email').value;
+      const senha = document.getElementById('senha').value;
+      signInWithEmailAndPassword(auth, email, senha)
+        .then((userCredential) => {
+          localStorage.setItem("uid", userCredential.user.uid);
+          window.location.href = "chat_firebase.html";
+        })
+        .catch((error) => {
+          document.getElementById("status").textContent = "Erro ao entrar: " + error.message;
+        });
+    }
+
+    function registrar() {
+      const email = document.getElementById('email').value;
+      const senha = document.getElementById('senha').value;
+      createUserWithEmailAndPassword(auth, email, senha)
+        .then((userCredential) => {
+          localStorage.setItem("uid", userCredential.user.uid);
+          window.location.href = "chat_firebase.html";
+        })
+        .catch((error) => {
+          document.getElementById("status").textContent = "Erro ao registrar: " + error.message;
+        });
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        localStorage.setItem("uid", user.uid);
+        window.location.href = "chat_firebase.html";
+      }
+    });
+  </script>
+</body>
+</html>
