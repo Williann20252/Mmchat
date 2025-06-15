@@ -7,26 +7,29 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #f0f2f5;
+      background-color: #f2f2f2;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
     }
+
     .login-box {
-      background-color: white;
-      padding: 2em;
+      background-color: #fff;
+      padding: 30px;
       border-radius: 12px;
       box-shadow: 0 0 20px rgba(0,0,0,0.1);
       width: 90%;
       max-width: 400px;
     }
+
     h2 {
       text-align: center;
       color: #4a90e2;
       margin-bottom: 20px;
     }
+
     input {
       width: 100%;
       padding: 12px;
@@ -35,6 +38,7 @@
       border-radius: 6px;
       font-size: 1em;
     }
+
     button {
       width: 100%;
       padding: 12px;
@@ -46,6 +50,7 @@
       font-size: 1em;
       cursor: pointer;
     }
+
     .status {
       margin-top: 10px;
       color: red;
@@ -64,7 +69,7 @@
     <div class="status" id="status"></div>
   </div>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
 
@@ -88,7 +93,7 @@
       auth.signInWithEmailAndPassword(email, senha)
         .then((userCredential) => {
           localStorage.setItem("uid", userCredential.user.uid);
-          window.location.href = "chat_firebase_autenticado.html";
+          window.location.href = "chat.html";
         })
         .catch((error) => {
           document.getElementById("status").textContent = "Erro ao entrar: " + error.message;
@@ -102,12 +107,19 @@
       auth.createUserWithEmailAndPassword(email, senha)
         .then((userCredential) => {
           localStorage.setItem("uid", userCredential.user.uid);
-          window.location.href = "chat_firebase_autenticado.html";
+          window.location.href = "chat.html";
         })
         .catch((error) => {
           document.getElementById("status").textContent = "Erro ao registrar: " + error.message;
         });
     }
+
+    // Se já estiver logado, redireciona para o chat
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        window.location.href = "chat.html";
+      }
+    });
   </script>
 </body>
 </html>
