@@ -7,29 +7,26 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #f2f2f2;
+      background-color: #f0f2f5;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
     }
-
     .login-box {
-      background-color: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      background-color: white;
+      padding: 2em;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
       width: 90%;
       max-width: 400px;
     }
-
     h2 {
       text-align: center;
       color: #4a90e2;
       margin-bottom: 20px;
     }
-
     input {
       width: 100%;
       padding: 12px;
@@ -38,7 +35,6 @@
       border-radius: 6px;
       font-size: 1em;
     }
-
     button {
       width: 100%;
       padding: 12px;
@@ -50,12 +46,10 @@
       font-size: 1em;
       cursor: pointer;
     }
-
     .status {
       margin-top: 10px;
       color: red;
       text-align: center;
-      font-size: 0.95em;
     }
   </style>
 </head>
@@ -69,11 +63,16 @@
     <div class="status" id="status"></div>
   </div>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+  <!-- Firebase Auth -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
       authDomain: "mmchat-f4f88.firebaseapp.com",
@@ -83,14 +82,14 @@
       appId: "1:404598754438:web:6a0892895591430d851507"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
     function login() {
       const email = document.getElementById('email').value;
       const senha = document.getElementById('senha').value;
 
-      auth.signInWithEmailAndPassword(email, senha)
+      signInWithEmailAndPassword(auth, email, senha)
         .then((userCredential) => {
           localStorage.setItem("uid", userCredential.user.uid);
           window.location.href = "chat.html";
@@ -104,7 +103,7 @@
       const email = document.getElementById('email').value;
       const senha = document.getElementById('senha').value;
 
-      auth.createUserWithEmailAndPassword(email, senha)
+      createUserWithEmailAndPassword(auth, email, senha)
         .then((userCredential) => {
           localStorage.setItem("uid", userCredential.user.uid);
           window.location.href = "chat.html";
@@ -114,8 +113,7 @@
         });
     }
 
-    // Se já estiver logado, redireciona para o chat
-    auth.onAuthStateChanged((user) => {
+    onAuthStateChanged(auth, (user) => {
       if (user) {
         window.location.href = "chat.html";
       }
