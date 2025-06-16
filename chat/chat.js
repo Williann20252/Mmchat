@@ -1,55 +1,94 @@
-// chat.js
+// Variables
+let users = ['Willian', 'Maria', 'João']; // Exemplo de usuários
+let isRecording = false;
+let mediaRecorder;
+let audioChunks = [];
 
-// Inicializa Firebase import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"; import { getDatabase, ref, push, onChildAdded, remove, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+// Function to send message
+function sendMessage() {
+  const messageInput = document.getElementById('messageInput');
+  const message = messageInput.value.trim();
 
-const firebaseConfig = { apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg", authDomain: "mmchat-f4f88.firebaseapp.com", databaseURL: "https://mmchat-f4f88-default-rtdb.firebaseio.com", projectId: "mmchat-f4f88", storageBucket: "mmchat-f4f88.appspot.com", messagingSenderId: "404598754438", appId: "1:404598754438:web:6a0892895591430d851507" };
+  if (message) {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message', 'sent');
+    messageDiv.innerHTML = `<span class="user">Você:</span><p class="text">${message}</p>`;
+    document.getElementById('messages').appendChild(messageDiv);
+    messageInput.value = ''; // Clear the input
+    messageDiv.scrollIntoView();
+  }
+}
 
-const app = initializeApp(firebaseConfig); const db = getDatabase(app); const mensagensRef = ref(db, "mensagens");
+// Function to handle Enter key
+function checkEnter(event) {
+  if (event.key === 'Enter') {
+    sendMessage();
+  }
+}
 
-const mural = document.getElementById("mural"); const mensagemInput = document.getElementById("mensagem"); const enviarBtn = document.getElementById("enviar"); const sairBtn = document.getElementById("sair");
+// Function to start audio recording
+function startRecording() {
+  if (isRecording) {
+    mediaRecorder.stop();
+    document.getElementById('audioBtn').textContent = '🎤';
+    isRecording = false;
+  } else {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then((stream) => {
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+        document.getElementById('audioBtn').textContent = '⏸️';
+        isRecording = true;
 
-const nickname = localStorage.getItem("nickname") || "Anônimo"; const userType = localStorage.getItem("userType") || "anonimo";
+        mediaRecorder.ondataavailable = (event) => {
+          audioChunks.push(event.data);
+        };
 
-function adicionarMensagemAoMural(texto, autor) { const msg = document.createElement("div"); msg.classList.add("mensagem"); msg.innerHTML = <strong class="${userType === 'premium' ? 'premium' : 'anonimo'}">@${autor}:</strong> ${texto}; mural.appendChild(msg); mural.scrollTop = mural.scrollHeight; }
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const audio = new Audio(audioUrl);
+          audio.play();
 
-enviarBtn.addEventListener("click", () => { const texto = mensagemInput.value.trim(); if (texto) { push(mensagensRef, { autor: nickname, texto }); mensagemInput.value = ""; } });
+          // Display audio message
+          const messageDiv = document.createElement('div');
+          messageDiv.classList.add('message', 'sent');
+          messageDiv.innerHTML = `<span class="user">Você:</span><p class="text">Áudio gravado</p>`;
+          document.getElementById('messages').appendChild(messageDiv);
+          messageDiv.scrollIntoView();
+        };
+      })
+      .catch((err) => {
+        console.error('Error accessing audio:', err);
+      });
+  }
+}
 
-mensagemInput.addEventListener("keypress", (e) => { if (e.key === "Enter") { e.preventDefault(); enviarBtn.click(); } });
+// Function to upload image
+function uploadImage() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.click();
+  
+  input.onchange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('message', 'sent');
+      messageDiv.innerHTML = `<span class="user">Você:</span><p class="text">Imagem enviada: ${file.name}</p>`;
+      document.getElementById('messages').appendChild(messageDiv);
+      messageDiv.scrollIntoView();
+    }
+  };
+}
 
-onChildAdded(mensagensRef, (data) => { const { autor, texto } = data.val(); adicionarMensagemAoMural(texto, autor); });
+// Function to view online users
+function viewUsers() {
+  alert('Usuários online: ' + users.join(', '));
+}
 
-sairBtn.addEventListener("click", () => { localStorage.clear(); window.location.href = "../index.html"; });
-
-// Botões de imagem e áudio const imagemInput = document.getElementById("imagemInput"); const imagemBtn = document.getElementById("imagemBtn"); imagemBtn.addEventListener("click", () => imagemInput.click());
-
-imagemInput.addEventListener("change", () => { const file = imagemInput.files[0]; if (file) { const reader = new FileReader(); reader.onload = function (e) { push(mensagensRef, { autor: nickname, texto: <img src='${e.target.result}' class='imagem-enviada' /> }); }; reader.readAsDataURL(file); } });
-
-const audioBtn = document.getElementById("audioBtn"); let mediaRecorder; let audioChunks = [];
-
-audioBtn.addEventListener("click", () => { navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => { mediaRecorder = new MediaRecorder(stream); mediaRecorder.start(); audioBtn.textContent = "Gravando... Clique para parar";
-
-mediaRecorder.addEventListener("dataavailable", (event) => {
-  audioChunks.push(event.data);
+// Function to handle logout
+document.getElementById('logout').addEventListener('click', () => {
+  window.location.href = '/';
 });
-
-mediaRecorder.addEventListener("stop", () => {
-  const audioBlob = new Blob(audioChunks);
-  const audioUrl = URL.createObjectURL(audioBlob);
-  push(mensagensRef, {
-    autor: nickname,
-    texto: `<audio controls src='${audioUrl}' class='audio-enviado'></audio>`
-  });
-  audioChunks = [];
-  audioBtn.textContent = "Áudio";
-});
-
-setTimeout(() => {
-  mediaRecorder.stop();
-}, 60000); // Limite de 60 segundos
-
-}); });
-
-// Ver usuários online const verUsuariosBtn = document.getElementById("usuariosBtn"); const usuariosBox = document.getElementById("usuariosBox");
-
-verUsuariosBtn.addEventListener("click", () => { usuariosBox.classList.toggle("ativo"); });
-
