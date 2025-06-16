@@ -1,0 +1,46 @@
+<!DOCTYPE html><html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MMChat - Sala</title>
+  <link rel="stylesheet" href="../style.css" />
+  <script defer src="chat.js"></script>
+</head>
+<body>
+  <div class="chat-container">
+    <header class="chat-header">
+      <h1>MMChat</h1>
+      <button id="sairBtn" class="btn sair">Sair</button>
+    </header><main class="chat-main">
+  <section class="chat-messages" id="chat-messages">
+    <!-- Mensagens serão inseridas aqui -->
+  </section>
+</main>
+
+<aside class="chat-sidebar">
+  <button id="usuariosBtn" class="btn usuarios">Ver Usuários</button>
+  <div id="usuariosOnline" class="usuarios-online"></div>
+</aside>
+
+<footer class="chat-footer">
+  <input type="text" id="mensagem" placeholder="Digite sua mensagem..." class="input-msg" />
+  <button id="enviarBtn" class="btn enviar">Enviar</button>
+  <label class="btn-clip">
+    <input type="file" id="imagemInput" accept="image/*" hidden />
+    📁
+  </label>
+  <button id="audioBtn" class="btn audio">Gravar Áudio</button>
+</footer>
+
+<audio id="audioPlayer" controls style="display:none;"></audio>
+
+  </div>  <script>
+    // Enviar com Enter
+    document.getElementById("mensagem").addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        document.getElementById("enviarBtn").click();
+      }
+    });
+  </script></body>
+</html>
