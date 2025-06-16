@@ -1,52 +1,59 @@
 <!DOCTYPE html><html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MMChat - Entrar</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="login-body">
-  <div class="login-container">
-    <h1 class="login-title">MMChat</h1>
-    <p class="login-subtitle">Apenas digite seu apelido para entrar</p>
-    <input type="text" id="nickname" placeholder="Seu nick" class="login-input" maxlength="20"/>
-    <button onclick="entrarChat()" class="login-button">Entrar</button>
-    <p id="status" class="login-status"></p>
-  </div>  <!-- Firebase SDK -->  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>  <script>
+<body>
+  <header>MMChat</header>
+  <main style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
+    <div class="login-box" style="max-width: 400px; width: 100%; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); padding: 2em;">
+      <h2 style="text-align: center; color: #4a90e2;">Bem-vindo ao MMChat</h2><input type="text" id="nickname" placeholder="Digite seu nick (somente anônimo)" style="width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 1em;">
+  <button onclick="entrarAnonimo()">Entrar como Anônimo</button>
+
+  <hr style="margin: 20px 0;">
+
+  <input type="email" id="email" placeholder="Email Premium" />
+  <input type="password" id="senha" placeholder="Senha Premium" />
+  <button onclick="loginPremium()">Entrar como Premium</button>
+  <div id="status" class="status"></div>
+</div>
+
+  </main>  <!-- Firebase SDK -->  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
       authDomain: "mmchat-f4f88.firebaseapp.com",
-      databaseURL: "https://mmchat-f4f88-default-rtdb.firebaseio.com",
       projectId: "mmchat-f4f88",
       storageBucket: "mmchat-f4f88.appspot.com",
       messagingSenderId: "404598754438",
       appId: "1:404598754438:web:6a0892895591430d851507"
     };
-
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    const auth = firebase.auth();
 
-    function entrarChat() {
+    function entrarAnonimo() {
       const nick = document.getElementById("nickname").value.trim();
-      const status = document.getElementById("status");
+      if (!nick) return alert("Digite um apelido para entrar!");
+      localStorage.setItem("nickname", nick);
+      localStorage.setItem("premium", "nao");
+      window.location.href = "chat.html";
+    }
 
-      if (nick.length < 3) {
-        status.textContent = "Digite um nick com pelo menos 3 letras.";
-        return;
-      }
-
-      // Verifica se o nick está registrado como Premium
-      db.ref("usuarios/" + nick).once("value", (snapshot) => {
-        const dados = snapshot.val();
-        const tipo = dados && dados.premium ? "premium" : "anonimo";
-
-        // Salva no localStorage
-        localStorage.setItem("nick", nick);
-        localStorage.setItem("tipo", tipo);
-
-        // Redireciona para o chat
-        window.location.href = "chat.html";
-      });
+    function loginPremium() {
+      const email = document.getElementById('email').value;
+      const senha = document.getElementById('senha').value;
+      auth.signInWithEmailAndPassword(email, senha)
+        .then((userCredential) => {
+          localStorage.setItem("uid", userCredential.user.uid);
+          localStorage.setItem("premium", "sim");
+          const nick = email.split("@")[0];
+          localStorage.setItem("nickname", nick);
+          window.location.href = "chat.html";
+        })
+        .catch((error) => {
+          document.getElementById("status").textContent = "Erro: " + error.message;
+        });
     }
   </script></body>
 </html>
