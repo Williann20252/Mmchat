@@ -2,61 +2,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MMChat</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f0f2f5;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }#chat-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+  <title>MMChat - Sala</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="chat-container">
+    <header class="chat-header">
+      <h2>MMChat</h2>
+      <button id="sair">Sair</button>
+    </header><div class="chat-messages" id="chat"></div>
 
-#messages {
-  flex: 1;
-  padding: 10px;
-  overflow-y: auto;
-  background: #ffffff;
-}
+<div class="chat-input-area">
+  <input type="text" id="mensagem" placeholder="Digite sua mensagem..." />
+  <button id="enviar">Enviar</button>
+  <div class="media-buttons">
+    <label class="upload-btn">
+      <input type="file" id="imagem" accept="image/*" hidden />
+      📷
+    </label>
+    <button id="gravar">🎤</button>
+    <button id="usuarios-btn">👥</button>
+  </div>
+</div>
 
-.message {
-  margin-bottom: 10px;
-}
-
-#input-area {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  background-color: #fff;
-  border-top: 1px solid #ccc;
-}
-
-#message-input {
-  flex: 1;
-  padding: 10px;
-  font-size: 1em;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-#send-button, #clip-button, #users-button {
-  margin-left: 8px;
-  padding: 10px;
-  font-size: 1em;
-  border: none;
-  border-radius: 5px;
-  background-color: #4a90e2;
-  color: white;
-  cursor: pointer;
-}
-
-#clip-options {
-  display: none;
-  position: absolute;
-
+  </div>  <div id="usuarios-lista" class="usuarios-flutuante hidden">
+    <h4>Usuários online</h4>
+    <ul id="usuarios"></ul>
+  </div>  <div id="estilo-premium" class="estilo-flutuante hidden">
+    <h4>Personalize seu estilo</h4>
+    <label>Fonte:</label>
+    <select id="fonteSelect">
+      <option value="Arial">Arial</option>
+      <option value="Courier New">Courier</option>
+      <option value="Georgia">Georgia</option>
+      <option value="Verdana">Verdana</option>
+    </select>
+    <label>Cor:</label>
+    <input type="color" id="corSelect" />
+    <button id="aplicarEstilo">Aplicar</button>
+  </div>  <script src="firebase.js"></script>  <script src="chat.js"></script></body>
+</html>
