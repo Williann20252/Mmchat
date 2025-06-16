@@ -1,34 +1,133 @@
-/* chat.css - Estilo moderno e centralizado para MMChat */
+/* Reset de margin e padding */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-body { margin: 0; font-family: 'Inter', sans-serif; background: linear-gradient(to bottom right, #2e2e91, #38bdf8); color: #fff; height: 100vh; display: flex; flex-direction: column; }
+/* Estilos do Body */
+body {
+  font-family: 'Arial', sans-serif;
+  background: #2d2d2d;
+  color: white;
+  margin: 0;
+  padding: 0;
+}
 
-header { background-color: rgba(0, 0, 0, 0.8); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; }
+/* Header */
+.header {
+  background: #111;
+  padding: 10px;
+  text-align: center;
+  font-size: 24px;
+}
 
-header h1 { margin: 0; font-weight: 700; }
+#logout {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
 
-header button { background: #38bdf8; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+#logout:hover {
+  background-color: #c0392b;
+}
 
-main { flex: 1; background-color: #ffffff; padding: 10px; overflow-y: auto; color: #333; }
+/* Chat container */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 90vh;
+  padding: 10px;
+}
 
-footer { background-color: #1e293b; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  background-color: #333;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
 
-footer .input-area { display: flex; gap: 10px; flex-direction: row; }
+.input-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
 
-footer input[type="text"] { flex: 1; padding: 10px; border-radius: 6px; border: none; font-size: 1rem; }
+input {
+  width: 80%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background: #444;
+  color: white;
+}
 
-footer button { background: #38bdf8; color: #fff; border: none; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.3s ease; }
+button {
+  background-color: #3498db;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
 
-footer button:hover { background: #0ea5e9; }
+button:hover {
+  background-color: #2980b9;
+}
 
-.actions { display: flex; justify-content: center; gap: 15px; }
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
+}
 
-.actions button { background: #3b82f6; padding: 10px; border: none; border-radius: 50%; color: white; font-size: 18px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
+.action-buttons button {
+  background-color: #9b59b6;
+  padding: 15px;
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 50%;
+}
 
-.actions button:hover { background: #2563eb; }
+.action-buttons button:hover {
+  background-color: #8e44ad;
+}
 
-@media (max-width: 600px) { header, footer { flex-direction: column; text-align: center; }
+/* Estilo para as mensagens */
+.message {
+  background-color: #1c1c1c;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  width: fit-content;
+  max-width: 80%;
+  color: #ddd;
+}
 
-footer .input-area { flex-direction: column; }
+.message .user {
+  font-weight: bold;
+  color: #3498db;
+}
 
-.actions { flex-wrap: wrap; } }
+.message .text {
+  margin-top: 5px;
+}
 
+.message.sent {
+  align-self: flex-end;
+  background-color: #34495e;
+}
+
+.message.received {
+  align-self: flex-start;
+  background-color: #1abc9c;
+  }
