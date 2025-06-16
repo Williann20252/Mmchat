@@ -1,43 +1,27 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!DOCTYPE html><html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MMChat - Sala</title>
   <link rel="stylesheet" href="../style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="chat-body">
+<body>
   <header class="chat-header">
     <h1>MMChat</h1>
-    <button id="sairBtn" class="btn sair">Sair</button>
-  </header>
+    <button id="logoutBtn" class="btn small">Sair</button>
+  </header>  <main class="chat-container">
+    <div class="chat-messages" id="chat-messages"></div><div class="chat-input">
+  <input type="text" id="messageInput" placeholder="Digite sua mensagem..." />
+  <button id="sendBtn">Enviar</button>
+  <div class="media-buttons">
+    <button id="audioBtn" title="Áudio">🎤</button>
+    <button id="imageBtn" title="Imagem">📷</button>
+    <button id="usersBtn" title="Usuários">👥</button>
+  </div>
+</div>
 
-  <main class="chat-container">
-    <div id="mural" class="mural"></div>
+<div class="user-panel" id="userPanel" style="display: none;"></div>
 
-    <div class="chat-controls">
-      <textarea id="mensagem" placeholder="Digite sua mensagem..."></textarea>
-      <button id="enviarBtn">Enviar</button>
-    </div>
-
-    <div class="chat-options">
-      <label for="imagemInput" class="btn clip">📎 Imagem</label>
-      <input type="file" id="imagemInput" accept="image/*" style="display: none;" />
-      
-      <button id="audioBtn" class="btn clip">🎤 Áudio</button>
-      <button id="usuariosBtn" class="btn usuarios">👥 Usuários</button>
-    </div>
-  </main>
-
-  <aside id="usuariosLista" class="usuarios-lista oculto">
-    <h3>Usuários Online</h3>
-    <ul id="usuariosAtivos"></ul>
-  </aside>
-
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="chat.js"></script>
-</body>
+  </main>  <script src="chat.js"></script></body>
 </html>
