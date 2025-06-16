@@ -20,6 +20,23 @@
       padding: 10px;
       text-align: center;
       font-size: 1.2em;
+      position: relative;
+    }
+
+    #nickname {
+      font-weight: bold;
+    }
+
+    #sairBtn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
     }
 
     #chat {
@@ -38,6 +55,8 @@
 
     #entrada {
       display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
       padding: 10px;
       background-color: #fff;
       border-top: 1px solid #ccc;
@@ -49,23 +68,48 @@
       font-size: 1em;
       border: 1px solid #ccc;
       border-radius: 6px;
+      min-width: 60%;
     }
 
     button {
       padding: 10px;
-      margin-left: 10px;
       background-color: #4a90e2;
       color: white;
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      font-size: 0.9em;
     }
 
-    #sairBtn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #e74c3c;
+    #usuariosOnline {
+      max-height: 120px;
+      overflow-y: auto;
+      padding: 5px;
+      border-top: 1px solid #ccc;
+      background: #fff;
+      font-size: 0.9em;
+    }
+
+    .usuario {
+      padding: 5px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .privado-box {
+      background-color: #eef;
+      padding: 10px;
+      margin-bottom: 5px;
+      border-radius: 5px;
+    }
+
+    .imagem-box, .audio-box {
+      margin-top: 10px;
+    }
+
+    .premium {
+      font-weight: bold;
+      color: gold;
+      text-shadow: 0 0 5px #f5c542;
     }
   </style>
 </head>
@@ -76,76 +120,21 @@
     <button id="sairBtn" onclick="sair()">Sair</button>
   </header>
 
+  <div id="usuariosOnline"><strong>Usuários Online:</strong></div>
+
   <div id="chat"></div>
 
   <div id="entrada">
     <input type="text" id="mensagem" placeholder="Digite sua mensagem..." />
     <button onclick="enviarMensagem()">Enviar</button>
+    <button onclick="enviarImagem()">📷 Imagem</button>
+    <button onclick="enviarAudio()">🎤 Áudio</button>
+    <button onclick="verUsuarios()">👥 Ver Usuários</button>
   </div>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <div class="imagem-box" id="imagemBox" style="display:none;"></div>
+  <div class="audio-box" id="audioBox" style="display:none;"></div>
+  <div class="privado-box" id="mensagemPrivadaBox" style="display:none;"></div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
-      authDomain: "mmchat-f4f88.firebaseapp.com",
-      databaseURL: "https://mmchat-f4f88-default-rtdb.firebaseio.com",
-      projectId: "mmchat-f4f88",
-      storageBucket: "mmchat-f4f88.appspot.com",
-      messagingSenderId: "404598754438",
-      appId: "1:404598754438:web:6a0892895591430d851507"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
-
-    const uid = localStorage.getItem("uid");
-    if (!uid) window.location.href = "index.html";
-
-    const nickname = "Usuário"; // aqui futuramente podemos puxar o nome salvo
-    document.getElementById("nickname").textContent = nickname;
-
-    const chatDiv = document.getElementById("chat");
-
-    window.enviarMensagem = function () {
-      const texto = document.getElementById("mensagem").value.trim();
-      if (!texto) return;
-
-      const msg = {
-        uid,
-        nome: nickname,
-        texto,
-        timestamp: Date.now()
-      };
-
-      db.ref("mensagens").push(msg);
-      document.getElementById("mensagem").value = "";
-    };
-
-    window.sair = function () {
-      localStorage.removeItem("uid");
-      auth.signOut().then(() => {
-        window.location.href = "index.html";
-      });
-    };
-
-    function mostrarMensagem(dado) {
-      const { nome, texto } = dado;
-      const msgDiv = document.createElement("div");
-      msgDiv.className = "mensagem";
-      msgDiv.textContent = `${nome}: ${texto}`;
-      chatDiv.appendChild(msgDiv);
-      chatDiv.scrollTop = chatDiv.scrollHeight;
-    }
-
-    db.ref("mensagens").on("child_added", (snapshot) => {
-      const dado = snapshot.val();
-      mostrarMensagem(dado);
-    });
-  </script>
 </body>
-</html
+</html>
