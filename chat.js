@@ -1,46 +1,166 @@
-// chat.js - Funções completas do MMChat
+// chat.js - MMChat completo
 
-// Inicializa o Firebase (garanta que firebase.js já fez isso) import { getDatabase, ref, push, onChildAdded, remove, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"; import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
+  authDomain: "mmchat-f4f88.firebaseapp.com",
+  databaseURL: "https://mmchat-f4f88-default-rtdb.firebaseio.com",
+  projectId: "mmchat-f4f88",
+  storageBucket: "mmchat-f4f88.appspot.com",
+  messagingSenderId: "404598754438",
+  appId: "1:404598754438:web:6a0892895591430d851507"
+};
 
-const db = getDatabase(); const auth = getAuth(); const chatRef = ref(db, "mensagens"); const usuariosRef = ref(db, "usuarios");
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
 
-let uid = localStorage.getItem("uid"); let nick = "Anônimo" + Math.floor(Math.random() * 1000); let premium = false;
+let nickname = prompt("Escolha seu nickname:");
+let uid = localStorage.getItem("uid") || Math.random().toString(36).substring(2);
+let isPremium = false;
 
-const chatBox = document.getElementById("chat"); const mensagemInput = document.getElementById("mensagem"); const enviarBtn = document.getElementById("enviar"); const sairBtn = document.getElementById("sair"); const usuariosBtn = document.getElementById("usuarios-btn"); const usuariosLista = document.getElementById("usuarios-lista"); const usuariosUL = document.getElementById("usuarios"); const aplicarEstilo = document.getElementById("aplicarEstilo");
+// Verifica se é Premium (você pode customizar isso)
+if (uid.startsWith("prem-")) isPremium = true;
 
-function enviarMensagem(texto, tipo = "texto") { const dados = { uid, nick, texto, tipo, hora: Date.now(), premium, estilo: premium ? { fonte: document.documentElement.style.getPropertyValue('--fonte') || 'Segoe UI', cor: document.documentElement.style.getPropertyValue('--cor') || '#000' } : {} }; push(chatRef, dados); }
+// Registrar presença
+const userRef = database.ref("usuarios/" + uid);
+userRef.set({ nickname, isPremium });
+userRef.onDisconnect().remove();
 
-mensagemInput.addEventListener("keypress", e => { if (e.key === "Enter") enviarMensagem(mensagemInput.value); });
+const chatRef = database.ref("mensagens");
 
-enviarBtn.onclick = () => { if (mensagemInput.value.trim()) { enviarMensagem(mensagemInput.value); mensagemInput.value = ""; } };
+// Limpar mensagens antigas ao entrar (opcional)
+chatRef.remove();
 
-onChildAdded(chatRef, (data) => { const msg = data.val(); const div = document.createElement("div"); div.classList.add("mensagem"); div.classList.add(msg.uid === uid ? "enviada" : "recebida");
+// Enviar mensagem
+function enviarMensagem(texto) {
+  if (!texto.trim()) return;
+  chatRef.push({
+    uid,
+    nickname,
+    texto,
+    tipo: "texto",
+    data: Date.now(),
+    isPremium
+  });
+  document.getElementById("mensagem").value = "";
+}
 
-let nickTag = msg.premium ? <span class="nick-premium">@${msg.nick}</span> : @${msg.nick};
+// Exibir mensagens
+chatRef.on("child_added", (snapshot) => {
+  const msg = snapshot.val();
+  const div = document.createElement("div");
+  div.classList.add("mensagem");
+  div.classList.add(msg.uid === uid ? "enviada" : "recebida");
 
-div.setAttribute("data-fonte", ""); div.setAttribute("data-cor", "");
+  if (msg.isPremium) {
+    const premiumTag = `<div class="nick-premium">@${msg.nickname}</div>`;
+    div.innerHTML = premiumTag + formataConteudo(msg);
+  } else {
+    div.innerHTML = `<strong>@${msg.nickname}</strong><br>${formataConteudo(msg)}`;
+  }
 
-if (msg.estilo) { div.style.setProperty("--fonte", msg.estilo.fonte); div.style.setProperty("--cor", msg.estilo.cor); }
+  document.getElementById("chat").appendChild(div);
+  document.getElementById("chat").scrollTop = chat.scrollHeight;
+});
 
-div.innerHTML = <strong>${nickTag}</strong><br>;
+// Conteúdo personalizado
+function formataConteudo(msg) {
+  if (msg.tipo === "imagem") {
+    return `<button onclick="toggleImg(this)">Ver imagem</button><br><img src="${msg.url}" style="max-width:100%;display:none"/>`;
+  } else if (msg.tipo === "audio") {
+    return `<audio controls src="${msg.url}" style="width:100%"></audio>`;
+  }
+  return msg.texto;
+}
 
-if (msg.tipo === "texto") { div.innerHTML += <span>${msg.texto}</span>; } else if (msg.tipo === "imagem") { div.innerHTML += <img src="${msg.texto}" style="max-width:100%; border-radius:8px; margin-top:4px;" />; } else if (msg.tipo === "audio") { div.innerHTML += <audio controls src="${msg.texto}" style="margin-top:4px;"></audio>; }
+// Enviar imagem
+document.getElementById("enviarImagem").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  const reader = new FileReader();
+  reader.onload = function () {
+    chatRef.push({
+      uid,
+      nickname,
+      url: reader.result,
+      tipo: "imagem",
+      data: Date.now(),
+      isPremium
+    });
+  };
+  reader.readAsDataURL(file);
+});
 
-chatBox.appendChild(div); chatBox.scrollTop = chatBox.scrollHeight; });
+// Enviar áudio (60s máx)
+let mediaRecorder;
+let audioChunks = [];
+const botaoGravar = document.getElementById("gravarAudio");
 
-sairBtn.onclick = () => { localStorage.removeItem("uid"); location.href = "index.html"; };
+botaoGravar.addEventListener("mousedown", async () => {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  mediaRecorder = new MediaRecorder(stream);
+  audioChunks = [];
 
-usuariosBtn.onclick = () => { usuariosLista.classList.toggle("hidden"); };
+  mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+  mediaRecorder.onstop = () => {
+    const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+    const reader = new FileReader();
+    reader.onload = () => {
+      chatRef.push({
+        uid,
+        nickname,
+        url: reader.result,
+        tipo: "audio",
+        data: Date.now(),
+        isPremium
+      });
+    };
+    reader.readAsDataURL(audioBlob);
+  };
 
-aplicarEstilo.onclick = () => { const fonte = document.getElementById("fonteSelect").value; const cor = document.getElementById("corSelect").value; document.documentElement.style.setProperty('--fonte', fonte); document.documentElement.style.setProperty('--cor', cor); };
+  mediaRecorder.start();
+  setTimeout(() => mediaRecorder.stop(), 60000);
+});
 
-// Upload imagem const imgInput = document.getElementById("imagem"); imgInput.onchange = (e) => { const file = e.target.files[0]; const reader = new FileReader(); reader.onload = () => enviarMensagem(reader.result, "imagem"); if (file) reader.readAsDataURL(file); };
+botaoGravar.addEventListener("mouseup", () => {
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    mediaRecorder.stop();
+  }
+});
 
-// Gravação de áudio let mediaRecorder; let audioChunks = []; const gravarBtn = document.getElementById("gravar");
+// Alternar imagem
+function toggleImg(btn) {
+  const img = btn.nextElementSibling;
+  img.style.display = img.style.display === "none" ? "block" : "none";
+}
 
-gravarBtn.onclick = async () => { if (!mediaRecorder || mediaRecorder.state === "inactive") { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); mediaRecorder = new MediaRecorder(stream); mediaRecorder.start(); gravarBtn.textContent = "⏹️"; audioChunks = []; mediaRecorder.ondataavailable = e => audioChunks.push(e.data); mediaRecorder.onstop = () => { const blob = new Blob(audioChunks, { type: 'audio/webm' }); const reader = new FileReader(); reader.onload = () => enviarMensagem(reader.result, "audio"); reader.readAsDataURL(blob); }; } else { mediaRecorder.stop(); gravarBtn.textContent = "🎤"; } };
+// Enviar mensagem com Enter
+document.getElementById("mensagem").addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    enviarMensagem(e.target.value);
+  }
+});
 
-// Autenticação onAuthStateChanged(auth, (user) => { if (user) { uid = user.uid; nick = user.email.split("@")[0]; premium = user.email.includes("premium"); set(ref(db, usuarios/${uid}), { nick, premium }); } });
+// Sair
+document.getElementById("btnSair").addEventListener("click", () => {
+  localStorage.removeItem("uid");
+  window.location.reload();
+});
 
-// Atualizar usuários online onChildAdded(usuariosRef, (snap) => { const user = snap.val(); const li = document.createElement("li"); li.textContent = user.premium ? ⭐ ${user.nick} : user.nick; usuariosUL.appendChild(li); });
+// Ver usuários online
+const listaUsuarios = document.getElementById("usuarios");
+const painelUsuarios = document.getElementById("usuarios-lista");
+document.getElementById("btnUsuarios").addEventListener("click", () => {
+  painelUsuarios.classList.toggle("hidden");
+});
 
+database.ref("usuarios").on("value", (snap) => {
+  listaUsuarios.innerHTML = "";
+  snap.forEach((child) => {
+    const usuario = child.val();
+    const li = document.createElement("li");
+    li.innerHTML = usuario.isPremium
+      ? `<span class="nick-premium">@${usuario.nickname}</span>`
+      : `@${usuario.nickname}`;
+    listaUsuarios.appendChild(li);
+  });
+});
