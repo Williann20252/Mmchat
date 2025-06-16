@@ -1,31 +1,30 @@
-<!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MMChat</title>
+  <title>MMChat - Sala de Chat</title>
   <link rel="stylesheet" href="chat.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+  <div class="header">
+    <h1>MMChat</h1>
+    <button id="logout">Sair</button>
+  </div>
+
   <div class="chat-container">
-    <header class="chat-header">
-      <h1>MMChat</h1>
-      <button id="logoutBtn">Sair</button>
-    </header><main id="chat-messages" class="chat-messages">
-  <!-- Mensagens aparecem aqui -->
-</main>
-
-<footer class="chat-footer">
-  <div class="input-row">
-    <input type="text" id="messageInput" placeholder="Digite sua mensagem..." />
-    <button id="sendBtn">Enviar</button>
+    <div class="messages" id="messages"></div>
+    <div class="input-container">
+      <input type="text" id="messageInput" placeholder="Digite sua mensagem..." onkeyup="checkEnter(event)" />
+      <button id="sendBtn" onclick="sendMessage()">Enviar</button>
+    </div>
+    <div class="action-buttons">
+      <button id="audioBtn" onclick="startRecording()">🎤</button>
+      <button id="imageBtn" onclick="uploadImage()">📷</button>
+      <button id="usersBtn" onclick="viewUsers()">👥</button>
+    </div>
   </div>
-  <div class="actions-row">
-    <button id="audioBtn">🎤</button>
-    <button id="imageBtn">📷</button>
-    <button id="usersBtn">👥</button>
-  </div>
-</footer>
 
-  </div>  <script src="chat.js"></script></body>
+  <script src="chat.js"></script>
+</body>
 </html>
