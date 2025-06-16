@@ -12,6 +12,7 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
+      font-size: 14px;
     }
     #chat {
       flex: 1;
@@ -20,25 +21,25 @@
       background-color: #fff;
     }
     .mensagem {
-      padding: 8px;
+      padding: 6px;
       border-bottom: 1px solid #ddd;
     }
     .input-box {
       display: flex;
       align-items: center;
-      padding: 10px;
+      padding: 8px;
       background: #f0f2f5;
     }
     input[type="text"] {
       flex: 1;
-      padding: 10px;
+      padding: 8px;
       font-size: 1em;
       border-radius: 5px;
       border: 1px solid #ccc;
     }
     .btn {
-      margin-left: 5px;
-      padding: 10px;
+      margin-left: 4px;
+      padding: 8px;
       font-size: 1em;
       border: none;
       border-radius: 5px;
@@ -62,13 +63,14 @@
       position: fixed;
       right: 0;
       top: 0;
-      width: 250px;
+      width: 220px;
       height: 100vh;
       background: white;
       border-left: 1px solid #ccc;
       overflow-y: auto;
       box-shadow: -2px 0 5px rgba(0,0,0,0.2);
       padding: 10px;
+      z-index: 10;
     }
     #audioControls {
       display: none;
@@ -85,6 +87,9 @@
       border-radius: 4px;
     }
   </style>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 <body><div id="chat"></div><div class="input-box">
   <input type="text" id="mensagem" placeholder="Digite sua mensagem..." />
@@ -95,7 +100,7 @@
   <button onclick="enviarImagem()">📷 Enviar Imagem</button><br>
   <button onclick="iniciarGravacao()">🎤 Gravar Áudio</button>
 </div><div id="audioControls">
-  <span>Gravando...</span>
+  <span id="gravandoLabel">Gravando...</span>
   <button class="audio-control-btn" onclick="pararGravacao()">Parar</button>
   <button class="audio-control-btn" onclick="reproduzirAudio()">Reproduzir</button>
   <button class="audio-control-btn" onclick="enviarAudio()">Enviar</button>
@@ -103,31 +108,85 @@
   <h3>Usuários Online</h3>
   <div id="usuariosOnline"></div>
 </div><script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
+    authDomain: "mmchat-f4f88.firebaseapp.com",
+    databaseURL: "https://mmchat-f4f88-default-rtdb.firebaseio.com",
+    projectId: "mmchat-f4f88",
+    storageBucket: "mmchat-f4f88.appspot.com",
+    messagingSenderId: "404598754438",
+    appId: "1:404598754438:web:6a0892895591430d851507"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const storage = firebase.storage();
+  const db = firebase.database();
+
+  let recorder;
+  let audioChunks = [];
+  let audioBlob;
+  let audioURL;
+
   function toggleClipMenu() {
     const menu = document.getElementById("clipOptions");
     menu.style.display = menu.style.display === "block" ? "none" : "block";
   }
-  
+
   function toggleUserList() {
     const list = document.getElementById("userList");
     list.style.display = list.style.display === "block" ? "none" : "block";
   }
 
   function iniciarGravacao() {
-    document.getElementById("audioControls").style.display = "block";
-    // Inicia gravador (lógica com MediaRecorder virá depois)
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      recorder = new MediaRecorder(stream);
+      audioChunks = [];
+      recorder.ondataavailable = e => audioChunks.push(e.data);
+      recorder.onstop = () => {
+        audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        audioURL = URL.createObjectURL(audioBlob);
+      };
+      recorder.start();
+      setTimeout(() => {
+        if (recorder.state === "recording") recorder.stop();
+      }, 60000);
+      document.getElementById("audioControls").style.display = "block";
+      document.getElementById("gravandoLabel").textContent = "Gravando...";
+    });
   }
 
   function pararGravacao() {
-    // Para a gravação
+    if (recorder && recorder.state === "recording") {
+      recorder.stop();
+      document.getElementById("gravandoLabel").textContent = "Áudio gravado.";
+    }
   }
 
   function reproduzirAudio() {
-    // Reproduz o áudio gravado
+    if (audioURL) {
+      const audio = new Audio(audioURL);
+      audio.play();
+    }
   }
 
   function enviarAudio() {
-    // Envia áudio para o Firebase
+    if (audioBlob) {
+      const fileName = `audios/audio_${Date.now()}.webm`;
+      const uploadTask = storage.ref(fileName).put(audioBlob);
+
+      uploadTask.on('state_changed', 
+        null, 
+        (error) => console.error('Erro ao enviar áudio:', error), 
+        () => {
+          uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+            db.ref('mensagens').push({
+              tipo: 'audio',
+              url: downloadURL,
+              timestamp: Date.now()
+            });
+          });
+        }
+      );
+    }
   }
 </script></body>
-</html
+</html>
