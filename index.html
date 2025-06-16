@@ -63,33 +63,29 @@
     <div class="status" id="status"></div>
   </div>
 
-  <!-- Firebase Auth -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getAuth,
-      signInWithEmailAndPassword,
-      createUserWithEmailAndPassword,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  <!-- Firebase SDK tradicional -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
       authDomain: "mmchat-f4f88.firebaseapp.com",
+      databaseURL: "https://mmchat-f4f88-default-rtdb.firebaseio.com",
       projectId: "mmchat-f4f88",
       storageBucket: "mmchat-f4f88.appspot.com",
       messagingSenderId: "404598754438",
       appId: "1:404598754438:web:6a0892895591430d851507"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
 
     function login() {
       const email = document.getElementById('email').value;
       const senha = document.getElementById('senha').value;
 
-      signInWithEmailAndPassword(auth, email, senha)
+      auth.signInWithEmailAndPassword(email, senha)
         .then((userCredential) => {
           localStorage.setItem("uid", userCredential.user.uid);
           window.location.href = "chat.html";
@@ -103,7 +99,7 @@
       const email = document.getElementById('email').value;
       const senha = document.getElementById('senha').value;
 
-      createUserWithEmailAndPassword(auth, email, senha)
+      auth.createUserWithEmailAndPassword(email, senha)
         .then((userCredential) => {
           localStorage.setItem("uid", userCredential.user.uid);
           window.location.href = "chat.html";
@@ -113,7 +109,7 @@
         });
     }
 
-    onAuthStateChanged(auth, (user) => {
+    auth.onAuthStateChanged((user) => {
       if (user) {
         window.location.href = "chat.html";
       }
