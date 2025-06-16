@@ -5,130 +5,78 @@
   box-sizing: border-box;
 }
 
-/* Fundo geral */
+/* Body */
 body {
   font-family: 'Segoe UI', sans-serif;
-  background-color: #2c2c2c;
-  color: #fff;
-  display: flex;
-  flex-direction: column;
   height: 100vh;
-}
-
-/* TOPO */
-.chat-header {
-  background-color: #4a90e2;
-  color: white;
-  padding: 1rem;
-  text-align: center;
-  font-size: 1.3rem;
-  font-weight: bold;
-  position: relative;
-}
-#btnSair {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  background-color: #fff;
-  color: #4a90e2;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-#btnSair:hover {
-  background-color: #e8e8e8;
-}
-
-/* MURAL */
-.chat-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  background-color: #fdfdfd;
-  padding: 0.5rem;
-  overflow-y: auto;
-}
-.chat-mural {
-  flex: 1;
-  background-color: #fff;
-  padding: 1rem;
-  border-radius: 6px;
-  overflow-y: auto;
-  margin-bottom: 1rem;
-  color: #222;
-}
-
-/* CONTROLES */
-.chat-controles {
-  background-color: #1e1e1e;
-  padding: 1rem;
-  border-top: 1px solid #444;
-}
-.input-group {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.7rem;
-}
-.input-group input[type='text'] {
-  flex: 1;
-  padding: 0.6rem;
-  border-radius: 5px;
-  border: none;
-  font-size: 1rem;
-}
-.input-group button {
-  background-color: #4a90e2;
-  color: white;
-  border: none;
-  padding: 0.6rem 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-}
-.input-group button:hover {
-  background-color: #367ad9;
-}
-
-/* PERSONALIZAÇÃO */
-.personalizacao {
+  background: linear-gradient(135deg, #3a0ca3, #4361ee, #4cc9f0);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: white;
-  font-size: 0.9rem;
-}
-.personalizacao select,
-.personalizacao input[type='color'] {
-  padding: 0.3rem;
-  border-radius: 4px;
-  border: none;
-}
-.personalizacao button {
-  background-color: #4a90e2;
-  color: white;
-  border: none;
-  padding: 0.5rem 0.8rem;
-  border-radius: 5px;
-  cursor: pointer;
-}
-.personalizacao button:hover {
-  background-color: #367ad9;
+  justify-content: center;
+  color: #333;
 }
 
-/* RODAPÉ */
-.chat-footer {
-  background-color: #111;
-  color: #999;
+/* Card Container */
+.container {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  padding: 40px;
+  width: 90%;
+  max-width: 400px;
   text-align: center;
-  padding: 0.8rem;
-  font-size: 0.8rem;
 }
 
-/* RESPONSIVO */
-@media (max-width: 600px) {
-  .input-group,
-  .personalizacao {
-    flex-direction: column;
-    align-items: stretch;
-  }
+/* Title */
+.container h2 {
+  font-size: 1.6rem;
+  margin-bottom: 20px;
+  color: #fff;
 }
+
+/* Inputs */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  background: rgba(255,255,255,0.9);
+}
+
+/* Buttons */
+button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(135deg, #2196f3, #21cbf3);
+  cursor: pointer;
+  transition: background 0.3s ease;
+  margin-bottom: 10px;
+}
+
+button:hover {
+  background: linear-gradient(135deg, #21cbf3, #2196f3);
+}
+
+/* Divider */
+hr {
+  margin: 20px 0;
+  border: none;
+  height: 1px;
+  background: rgba(255,255,255,0.3);
+}
+
+/* Responsive */
+@media screen and (max-width: 480px) {
+  .container {
+    padding: 30px 20px;
+  }
