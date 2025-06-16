@@ -1,12 +1,11 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!DOCTYPE html><html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MMChat - Sala</title>
+  <title>MMChat</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
       background-color: #eef1f5;
@@ -26,6 +25,7 @@
     }
     .input-box {
       display: flex;
+      align-items: center;
       padding: 10px;
       background: #f0f2f5;
     }
@@ -36,7 +36,7 @@
       border-radius: 5px;
       border: 1px solid #ccc;
     }
-    button {
+    .btn {
       margin-left: 5px;
       padding: 10px;
       font-size: 1em;
@@ -46,143 +46,88 @@
       color: white;
       cursor: pointer;
     }
-    #usuariosOnline {
-      background: #f9f9f9;
+    #clipOptions {
+      display: none;
+      position: absolute;
+      bottom: 60px;
+      left: 10px;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       padding: 10px;
-      border-top: 1px solid #ddd;
-      font-size: 0.9em;
+    }
+    #userList {
+      display: none;
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 250px;
+      height: 100vh;
+      background: white;
+      border-left: 1px solid #ccc;
+      overflow-y: auto;
+      box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+      padding: 10px;
+    }
+    #audioControls {
+      display: none;
+      padding: 10px;
+      background: #e6f0ff;
+      border-top: 1px solid #ccc;
+    }
+    .audio-control-btn {
+      margin-right: 10px;
+      padding: 5px 10px;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 4px;
     }
   </style>
 </head>
-<body>
-
-<div id="chat"></div>
-
-<div class="input-box">
+<body><div id="chat"></div><div class="input-box">
   <input type="text" id="mensagem" placeholder="Digite sua mensagem..." />
-  <button onclick="enviarMensagem()">Enviar</button>
-  <button onclick="enviarImagem()">📷</button>
-  <button onclick="enviarAudio()">🎤</button>
-  <button onclick="verUsuarios()">👥</button>
-  <button onclick="sair()">🚪</button>
-</div>
-
-<div id="usuariosOnline"></div>
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
-    authDomain: "mmchat-f4f88.firebaseapp.com",
-    databaseURL: "https://mmchat-f4f88-default-rtdb.firebaseio.com",
-    projectId: "mmchat-f4f88",
-    storageBucket: "mmchat-f4f88.appspot.com",
-    messagingSenderId: "404598754438",
-    appId: "1:404598754438:web:6a0892895591430d851507"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const database = firebase.database();
-  const storage = firebase.storage();
-
-  const uid = localStorage.getItem("uid") || "anônimo";
-  const horaEntrada = Date.now();
-  const mensagensRef = database.ref("mensagens");
-  const usuariosRef = database.ref("usuariosOnline");
-
-  usuariosRef.child(uid).set({ online: true });
-  usuariosRef.child(uid).onDisconnect().remove();
-
-  mensagensRef
-    .orderByChild("timestamp")
-    .startAt(horaEntrada)
-    .on("child_added", (snap) => {
-      const msg = snap.val();
-      const div = document.createElement("div");
-      div.className = "mensagem";
-
-      if (msg.tipo === "imagem") {
-        div.innerHTML = `<strong>${msg.nome || "Usuário"}:</strong><br><img src="${msg.url}" width="180"/>`;
-      } else if (msg.tipo === "audio") {
-        div.innerHTML = `<strong>${msg.nome || "Usuário"}:</strong><br><audio controls src="${msg.url}"></audio>`;
-      } else {
-        div.innerHTML = `<strong>${msg.nome || "Usuário"}:</strong> ${msg.texto}`;
-      }
-
-      document.getElementById("chat").appendChild(div);
-      document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
-    });
-
-  function enviarMensagem() {
-    const texto = document.getElementById("mensagem").value.trim();
-    if (texto === "") return;
-    mensagensRef.push({ texto, uid, nome: uid, timestamp: Date.now(), tipo: "texto" });
-    document.getElementById("mensagem").value = "";
+  <button class="btn" onclick="enviarMensagem()">Enviar</button>
+  <button class="btn" onclick="toggleClipMenu()">📎</button>
+  <button class="btn" onclick="toggleUserList()">👥</button>
+</div><div id="clipOptions">
+  <button onclick="enviarImagem()">📷 Enviar Imagem</button><br>
+  <button onclick="iniciarGravacao()">🎤 Gravar Áudio</button>
+</div><div id="audioControls">
+  <span>Gravando...</span>
+  <button class="audio-control-btn" onclick="pararGravacao()">Parar</button>
+  <button class="audio-control-btn" onclick="reproduzirAudio()">Reproduzir</button>
+  <button class="audio-control-btn" onclick="enviarAudio()">Enviar</button>
+</div><div id="userList">
+  <h3>Usuários Online</h3>
+  <div id="usuariosOnline"></div>
+</div><script>
+  function toggleClipMenu() {
+    const menu = document.getElementById("clipOptions");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+  }
+  
+  function toggleUserList() {
+    const list = document.getElementById("userList");
+    list.style.display = list.style.display === "block" ? "none" : "block";
   }
 
-  function enviarImagem() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.onchange = (e) => {
-      const file = e.target.files[0];
-      const ref = storage.ref().child("imagens/" + Date.now() + "_" + file.name);
-      ref.put(file).then((snap) => {
-        snap.ref.getDownloadURL().then((url) => {
-          mensagensRef.push({ url, uid, nome: uid, timestamp: Date.now(), tipo: "imagem" });
-        });
-      });
-    };
-    input.click();
+  function iniciarGravacao() {
+    document.getElementById("audioControls").style.display = "block";
+    // Inicia gravador (lógica com MediaRecorder virá depois)
   }
 
-  let recorder, audioChunks = [];
+  function pararGravacao() {
+    // Para a gravação
+  }
+
+  function reproduzirAudio() {
+    // Reproduz o áudio gravado
+  }
+
   function enviarAudio() {
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-      recorder = new MediaRecorder(stream);
-      recorder.ondataavailable = e => audioChunks.push(e.data);
-      recorder.onstop = () => {
-        const blob = new Blob(audioChunks, { type: "audio/mp3" });
-        const ref = storage.ref().child("audios/" + Date.now() + ".mp3");
-        ref.put(blob).then(snap => {
-          snap.ref.getDownloadURL().then(url => {
-            mensagensRef.push({ url, uid, nome: uid, timestamp: Date.now(), tipo: "audio" });
-            audioChunks = [];
-          });
-        });
-      };
-      recorder.start();
-      setTimeout(() => recorder.stop(), 5000);
-      alert("Gravando áudio por 5 segundos...");
-    });
+    // Envia áudio para o Firebase
   }
-
-  function verUsuarios() {
-    const box = document.getElementById("usuariosOnline");
-    box.innerHTML = "<strong>Usuários Online:</strong><br>";
-    usuariosRef.on("value", (snap) => {
-      box.innerHTML = "<strong>Usuários Online:</strong><br>";
-      snap.forEach((child) => {
-        const nome = child.key;
-        const item = document.createElement("div");
-        item.className = "usuario";
-        item.textContent = nome;
-        box.appendChild(item);
-      });
-    });
-  }
-
-  function sair() {
-    localStorage.removeItem("uid");
-    auth.signOut().then(() => window.location.href = "index.html");
-  }
-</script>
-
-</body>
-</html>
+</script></body>
+</html
