@@ -1,217 +1,48 @@
-/* style.css - MMChat refinado */
+/* ESTILO GERAL */ body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #1e1e1e; color: #fff; display: flex; flex-direction: column; min-height: 100vh; }
 
-:root {
-  --fonte: 'Segoe UI', sans-serif;
-  --cor-fundo: #f7f7f7;
-  --cor-chat-bg: #2f2f2f;
-  --cor-mensagem: #ffffff;
-  --cor-primaria: #4a90e2;
-  --gradiente-premium: linear-gradient(90deg, #ff9966, #ff5e62);
-}
+.header-topo { background-color: #4a90e2; padding: 1em; display: flex; justify-content: space-between; align-items: center; color: white; }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+.header-topo h1 { margin: 0; }
 
-body {
-  font-family: var(--fonte);
-  background-color: var(--cor-fundo);
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
+.header-topo button { background-color: #fff; color: #4a90e2; border: none; padding: 0.5em 1em; border-radius: 6px; cursor: pointer; }
 
-header {
-  background-color: var(--cor-primaria);
-  color: white;
-  padding: 12px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
+.chat-container { flex: 1; background-color: #fff; padding: 1em; overflow-y: auto; max-height: 65vh; border-top-left-radius: 20px; border-top-right-radius: 20px; }
 
-.logo {
-  font-size: 1.4em;
-  font-weight: bold;
-}
+.chat-mural { display: flex; flex-direction: column; gap: 1em; }
 
-main {
-  flex: 1;
-  background-color: var(--cor-chat-bg);
-  padding: 10px;
-  overflow-y: auto;
-}
+.chat-controles { background-color: #2a2a2a; padding: 1em; border-top: 1px solid #444; }
 
-#chat {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+.input-area { display: flex; gap: 0.5em; margin-bottom: 0.5em; }
 
-.mensagem {
-  background-color: var(--cor-mensagem);
-  color: #000;
-  padding: 10px;
-  border-radius: 8px;
-  max-width: 80%;
-  word-wrap: break-word;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
+.input-area input[type="text"] { flex: 1; padding: 0.75em; border-radius: 8px; border: none; font-size: 1em; }
 
-.mensagem.enviada {
-  align-self: flex-end;
-  background-color: #d0ebff;
-}
+.input-area button { background-color: #4a90e2; border: none; padding: 0.75em 1em; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; }
 
-.mensagem.recebida {
-  align-self: flex-start;
-  background-color: #ffffff;
-}
+.input-opcoes { position: relative; }
 
-.nick-premium {
-  background: var(--gradiente-premium);
-  color: white;
-  padding: 3px 6px;
-  border-radius: 12px;
-  font-weight: bold;
-  display: inline-block;
-  margin-bottom: 4px;
-}
+.clip-menu { font-size: 1.5em; cursor: pointer; position: relative; }
 
-footer {
-  background-color: #fff;
-  padding: 10px;
-  border-top: 1px solid #ccc;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-}
+.clip-opcoes { position: absolute; top: 2em; left: 0; background-color: #fff; color: #000; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); padding: 0.5em; display: none; flex-direction: column; z-index: 99; }
 
-.input-wrapper {
-  flex: 1;
-  display: flex;
-  gap: 8px;
-  width: 100%;
-}
+.clip-menu:hover .clip-opcoes { display: flex; }
 
-#mensagem {
-  flex: 1;
-  padding: 10px;
-  font-size: 1em;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
+.custom-style { margin-top: 1em; display: flex; gap: 0.5em; align-items: center; flex-wrap: wrap; }
 
-button {
-  padding: 10px 14px;
-  background-color: var(--cor-primaria);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1em;
-}
+.footer-base { background-color: #333; color: #bbb; padding: 0.5em; text-align: center; }
 
-button:hover {
-  opacity: 0.9;
-}
+/* Estilo para mensagens */ .mensagem { padding: 0.75em; border-radius: 10px; max-width: 80%; word-break: break-word; background-color: #f1f1f1; color: #000; }
 
-.botoes-acao {
-  margin-top: 10px;
-  position: relative;
-}
+.mensagem.enviada { align-self: flex-end; background-color: #dcf8c6; }
 
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
+.mensagem.recebida { align-self: flex-start; background-color: #e2e2e2; }
 
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #fff;
-  min-width: 150px;
-  border: 1px solid #ccc;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  z-index: 1;
-  top: 40px;
-  right: 0;
-  border-radius: 6px;
-}
+/* Estilo Premium */ .nick-premium { background: linear-gradient(90deg, #f39c12, #e74c3c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; position: relative; }
 
-.dropdown:hover .dropdown-content {
-  display: block;
-}
+.nick-premium::after { content: '✔'; position: absolute; right: -1.2em; color: gold; }
 
-.dropdown-content label {
-  display: block;
-  padding: 10px;
-  cursor: pointer;
-}
+/* Usuários online */ .usuarios-painel { position: fixed; right: 1em; top: 4em; background: #292929; color: white; padding: 1em; border-radius: 10px; max-height: 300px; overflow-y: auto; box-shadow: 0 0 10px #000; }
 
-.estilo-premium {
-  background-color: #fff;
-  padding: 10px;
-  border-top: 1px solid #ccc;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 0.95em;
-}
+.hidden { display: none; }
 
-.estilo-opcoes {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+/* Responsivo */ @media (max-width: 600px) { .chat-container { max-height: 55vh; } .custom-style { flex-direction: column; align-items: flex-start; } .usuarios-painel { top: auto; bottom: 6em; right: 0.5em; } }
 
-#usuarios-lista {
-  position: fixed;
-  top: 60px;
-  right: 10px;
-  background: white;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  max-height: 250px;
-  overflow-y: auto;
-  display: none;
-  z-index: 99;
-}
-
-#usuarios-lista.hidden {
-  display: none;
-}
-
-#usuarios li {
-  padding: 4px 0;
-  font-weight: bold;
-}
-
-@media (max-width: 600px) {
-  .input-wrapper, footer {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  #mensagem {
-    width: 100%;
-  }
-
-  button {
-    width: 100%;
-  }
-
-  .dropdown-content {
-    right: auto;
-    left: 0;
-  }
-  }
