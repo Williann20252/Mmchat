@@ -2,26 +2,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MMChat - Sala</title>
-  <link rel="stylesheet" href="../style.css" />
+  <title>MMChat</title>
+  <link rel="stylesheet" href="chat.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header class="chat-header">
-    <h1>MMChat</h1>
-    <button id="logoutBtn" class="btn small">Sair</button>
-  </header>  <main class="chat-container">
-    <div class="chat-messages" id="chat-messages"></div><div class="chat-input">
-  <input type="text" id="messageInput" placeholder="Digite sua mensagem..." />
-  <button id="sendBtn">Enviar</button>
-  <div class="media-buttons">
-    <button id="audioBtn" title="Áudio">🎤</button>
-    <button id="imageBtn" title="Imagem">📷</button>
-    <button id="usersBtn" title="Usuários">👥</button>
+  <div class="chat-container">
+    <header class="chat-header">
+      <h1>MMChat</h1>
+      <button id="logoutBtn">Sair</button>
+    </header><main id="chat-messages" class="chat-messages">
+  <!-- Mensagens aparecem aqui -->
+</main>
+
+<footer class="chat-footer">
+  <div class="input-row">
+    <input type="text" id="messageInput" placeholder="Digite sua mensagem..." />
+    <button id="sendBtn">Enviar</button>
   </div>
-</div>
+  <div class="actions-row">
+    <button id="audioBtn">🎤</button>
+    <button id="imageBtn">📷</button>
+    <button id="usersBtn">👥</button>
+  </div>
+</footer>
 
-<div class="user-panel" id="userPanel" style="display: none;"></div>
-
-  </main>  <script src="chat.js"></script></body>
+  </div>  <script src="chat.js"></script></body>
 </html>
