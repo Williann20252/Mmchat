@@ -1,50 +1,36 @@
 <!DOCTYPE html><html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MMChat - Sala</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MMChat</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body class="chat-body">
-  <header class="header-topo">
+  <header class="chat-header">
     <h1>MMChat</h1>
     <button id="btnSair">Sair</button>
   </header>  <main class="chat-container">
-    <section id="chat" class="chat-mural"></section>
-  </main>  <div class="chat-controles">
-    <div class="input-area">
-      <input type="text" id="mensagem" placeholder="Digite sua mensagem..." />
-      <button id="btnEnviar">Enviar</button>
-    </div><div class="input-opcoes">
-  <label class="clip-menu">
-    📎
-    <input type="file" id="enviarImagem" accept="image/*" hidden>
-    <div class="clip-opcoes">
-      <label for="enviarImagem">📷 Imagem</label>
-      <button id="gravarAudio">🎤 Áudio</button>
-      <button id="btnUsuarios">👥 Ver usuários</button>
-    </div>
-  </label>
-</div>
+    <section id="mural" class="chat-mural"></section><section class="chat-controles">
+  <div class="input-group">
+    <input type="text" id="mensagem" placeholder="Digite sua mensagem..." />
+    <button id="btnEnviar">Enviar</button>
+  </div>
 
-<div class="custom-style">
-  <label>Fonte:
-    <select id="fonte">
-      <option>Arial</option>
-      <option>Verdana</option>
-      <option>Courier</option>
-    </select>
-  </label>
-  <label>Cor:
-    <input type="color" id="corFonte" value="#000000">
-  </label>
-  <button id="btnAplicar">Aplicar</button>
-</div>
+  <div class="personalizacao">
+    <label>Fonte:
+      <select id="fonte">
+        <option value="Arial">Arial</option>
+        <option value="Verdana">Verdana</option>
+        <option value="Courier New">Courier New</option>
+        <option value="Georgia">Georgia</option>
+      </select>
+    </label>
+    <label>Cor:
+      <input type="color" id="cor" value="#000000" />
+    </label>
+    <button id="btnAplicar">Aplicar</button>
+  </div>
+</section>
 
-  </div>  <aside id="usuarios-lista" class="usuarios-painel hidden">
-    <h3>Usuários Online</h3>
-    <ul id="usuarios"></ul>
-  </aside>  <footer class="footer-base">
-    <p>MMChat © 2025</p>
-  </footer>  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>  <script src="chat.js"></script></body>
+  </main>  <footer class="chat-footer">MMChat © 2025</footer>  <script type="module" src="chat.js"></script></body>
 </html>
