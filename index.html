@@ -2,71 +2,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MMChat - Início</title>
+  <title>MMChat - Entrada</title>
   <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="inicio-body">
-  <div class="inicio-container">
-    <h1 class="titulo">Bem-vindo ao <span>MMChat</span></h1><div class="entrada-box">
-  <input type="text" id="nickname" placeholder="Digite seu nome de usuário" />
-  <button onclick="entrarComoAnonimo()">Entrar como Anônimo</button>
+<body>
+  <div class="container">
+    <div class="glass-card">
+      <h1 class="title">Bem-vindo ao <span>MMChat</span></h1>
+      <p class="subtitle">Escolha como deseja entrar</p><input type="text" id="nickname" placeholder="Digite seu nome de usuário" class="input" />
+  <button id="anonimoBtn" class="btn primary">Entrar como Anônimo</button>
+
+  <div class="divider"></div>
+
+  <input type="email" id="email" placeholder="Email Premium" class="input" />
+  <input type="password" id="senha" placeholder="Senha Premium" class="input" />
+  <button id="premiumBtn" class="btn gradient">Entrar como Premium</button>
+
+  <p id="status" class="status"></p>
 </div>
 
-<div class="linha"></div>
-
-<div class="entrada-box premium">
-  <input type="email" id="email" placeholder="Email Premium" />
-  <input type="password" id="senha" placeholder="Senha Premium" />
-  <button onclick="entrarComoPremium()">Entrar como Premium</button>
-</div>
-
-  </div>  <footer class="footer">MMChat © 2025</footer>  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-    import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
-      authDomain: "mmchat-f4f88.firebaseapp.com",
-      projectId: "mmchat-f4f88",
-      storageBucket: "mmchat-f4f88.appspot.com",
-      messagingSenderId: "404598754438",
-      appId: "1:404598754438:web:6a0892895591430d851507"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    window.entrarComoAnonimo = () => {
-      const nick = document.getElementById('nickname').value.trim();
+  </div>  <script>
+    document.getElementById("anonimoBtn").addEventListener("click", function() {
+      const nick = document.getElementById("nickname").value.trim();
       if (nick) {
-        localStorage.setItem('nick', nick);
-        localStorage.setItem('premium', 'false');
-        window.location.href = 'chat.html';
+        localStorage.setItem("nickname", nick);
+        localStorage.setItem("userType", "anonimo");
+        window.location.href = "./chat/chat.html";
       } else {
-        alert('Digite um nome para continuar.');
+        document.getElementById("status").textContent = "Digite um nome de usuário.";
       }
-    };
+    });
 
-    window.entrarComoPremium = () => {
-      const email = document.getElementById('email').value;
-      const senha = document.getElementById('senha').value;
-      const nick = document.getElementById('nickname').value.trim() || email;
-
-      if (!email || !senha) {
-        alert('Preencha email e senha premium.');
-        return;
+    document.getElementById("premiumBtn").addEventListener("click", function() {
+      const email = document.getElementById("email").value.trim();
+      const senha = document.getElementById("senha").value.trim();
+      if (email && senha) {
+        // Firebase login vai aqui se quiser integrar depois
+        localStorage.setItem("nickname", email);
+        localStorage.setItem("userType", "premium");
+        window.location.href = "./chat/chat.html";
+      } else {
+        document.getElementById("status").textContent = "Preencha o email e senha.";
       }
-
-      signInWithEmailAndPassword(auth, email, senha)
-        .then((userCredential) => {
-          localStorage.setItem('nick', nick);
-          localStorage.setItem('premium', 'true');
-          localStorage.setItem('uid', userCredential.user.uid);
-          window.location.href = 'chat.html';
-        })
-        .catch((error) => {
-          alert('Erro: ' + error.message);
-        });
-    };
+    });
   </script></body>
 </html>
