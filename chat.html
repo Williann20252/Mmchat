@@ -3,93 +3,92 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MMChat - Sala</title>
+  <title>MMChat</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
       margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f1f1f1;
       display: flex;
       flex-direction: column;
       height: 100vh;
-      background-color: #eef2f5;
     }
 
     header {
       background-color: #4a90e2;
       color: white;
-      padding: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: 10px;
+      text-align: center;
+      font-size: 1.2em;
     }
 
-    main {
+    #chat {
       flex: 1;
-      padding: 1rem;
+      padding: 10px;
       overflow-y: auto;
     }
 
-    footer {
-      display: flex;
-      padding: 1rem;
-      background-color: #fff;
-      border-top: 1px solid #ddd;
-      gap: 10px;
-    }
-
-    input[type="text"] {
-      flex: 1;
-      padding: 12px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 1em;
-    }
-
-    button {
-      padding: 12px 20px;
-      background-color: #4a90e2;
-      border: none;
-      color: white;
-      border-radius: 6px;
-      font-size: 1em;
-      cursor: pointer;
-    }
-
-    .message {
+    .mensagem {
+      margin: 5px 0;
+      padding: 8px;
+      border-radius: 5px;
       background-color: white;
-      margin-bottom: 10px;
-      padding: 10px;
-      border-radius: 6px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
 
-    .message strong {
-      color: #4a90e2;
+    #entrada {
+      display: flex;
+      padding: 10px;
+      background-color: #fff;
+      border-top: 1px solid #ccc;
+    }
+
+    #mensagem {
+      flex: 1;
+      padding: 10px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 10px;
+      margin-left: 10px;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #sairBtn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #e74c3c;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <span id="user-info">Carregando...</span>
-    <button onclick="logout()">Sair</button>
+    MMChat - Bem-vindo(a), <span id="nickname">Usuário</span>
+    <button id="sairBtn" onclick="sair()">Sair</button>
   </header>
 
-  <main id="chat-container">
-    <div class="message"><strong>Sistema:</strong> Bem-vindo ao MMChat!</div>
-  </main>
+  <div id="chat"></div>
 
-  <footer>
-    <input type="text" id="mensagem" placeholder="Digite uma mensagem..." />
+  <div id="entrada">
+    <input type="text" id="mensagem" placeholder="Digite sua mensagem..." />
     <button onclick="enviarMensagem()">Enviar</button>
-  </footer>
+  </div>
 
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
       authDomain: "mmchat-f4f88.firebaseapp.com",
@@ -100,59 +99,53 @@
       appId: "1:404598754438:web:6a0892895591430d851507"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
 
-    let currentUser;
+    const uid = localStorage.getItem("uid");
+    if (!uid) window.location.href = "index.html";
 
-    // Verifica se o usuário está logado
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user;
-        document.getElementById("user-info").textContent = "Usuário: " + (user.email || user.uid);
-        escutarMensagens();
-      } else {
-        window.location.href = "index.html";
-      }
-    });
+    const nickname = "Usuário"; // aqui futuramente podemos puxar o nome salvo
+    document.getElementById("nickname").textContent = nickname;
 
-    // Logout
-    function logout() {
-      signOut(auth).then(() => {
-        window.location.href = "index.html";
-      });
-    }
+    const chatDiv = document.getElementById("chat");
 
-    // Enviar mensagem para o Firebase
-    function enviarMensagem() {
-      const msg = document.getElementById("mensagem").value.trim();
-      if (!msg) return;
+    window.enviarMensagem = function () {
+      const texto = document.getElementById("mensagem").value.trim();
+      if (!texto) return;
 
-      const chatRef = ref(db, "mensagens");
-      push(chatRef, {
-        uid: currentUser.uid,
-        email: currentUser.email || "anônimo",
-        texto: msg,
+      const msg = {
+        uid,
+        nome: nickname,
+        texto,
         timestamp: Date.now()
-      });
+      };
 
+      db.ref("mensagens").push(msg);
       document.getElementById("mensagem").value = "";
-    }
+    };
 
-    // Escutar mensagens em tempo real
-    function escutarMensagens() {
-      const chatRef = ref(db, "mensagens");
-      onChildAdded(chatRef, (data) => {
-        const msg = data.val();
-        const div = document.createElement("div");
-        div.className = "message";
-        div.innerHTML = `<strong>${msg.email}:</strong> ${msg.texto}`;
-        document.getElementById("chat-container").appendChild(div);
-        div.scrollIntoView({ behavior: "smooth" });
+    window.sair = function () {
+      localStorage.removeItem("uid");
+      auth.signOut().then(() => {
+        window.location.href = "index.html";
       });
-    }
-  </script>
+    };
 
+    function mostrarMensagem(dado) {
+      const { nome, texto } = dado;
+      const msgDiv = document.createElement("div");
+      msgDiv.className = "mensagem";
+      msgDiv.textContent = `${nome}: ${texto}`;
+      chatDiv.appendChild(msgDiv);
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+    }
+
+    db.ref("mensagens").on("child_added", (snapshot) => {
+      const dado = snapshot.val();
+      mostrarMensagem(dado);
+    });
+  </script>
 </body>
-</html>
+</html
