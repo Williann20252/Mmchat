@@ -1,192 +1,62 @@
 <!DOCTYPE html><html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MMChat</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
       margin: 0;
-      padding: 0;
-      background-color: #eef1f5;
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
       display: flex;
       flex-direction: column;
       height: 100vh;
-      font-size: 14px;
-    }
-    #chat {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px;
-      background-color: #fff;
-    }
-    .mensagem {
-      padding: 6px;
-      border-bottom: 1px solid #ddd;
-    }
-    .input-box {
-      display: flex;
-      align-items: center;
-      padding: 8px;
-      background: #f0f2f5;
-    }
-    input[type="text"] {
-      flex: 1;
-      padding: 8px;
-      font-size: 1em;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    .btn {
-      margin-left: 4px;
-      padding: 8px;
-      font-size: 1em;
-      border: none;
-      border-radius: 5px;
-      background-color: #4a90e2;
-      color: white;
-      cursor: pointer;
-    }
-    #clipOptions {
-      display: none;
-      position: absolute;
-      bottom: 60px;
-      left: 10px;
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      padding: 10px;
-    }
-    #userList {
-      display: none;
-      position: fixed;
-      right: 0;
-      top: 0;
-      width: 220px;
-      height: 100vh;
-      background: white;
-      border-left: 1px solid #ccc;
-      overflow-y: auto;
-      box-shadow: -2px 0 5px rgba(0,0,0,0.2);
-      padding: 10px;
-      z-index: 10;
-    }
-    #audioControls {
-      display: none;
-      padding: 10px;
-      background: #e6f0ff;
-      border-top: 1px solid #ccc;
-    }
-    .audio-control-btn {
-      margin-right: 10px;
-      padding: 5px 10px;
-      background-color: #4a90e2;
-      color: white;
-      border: none;
-      border-radius: 4px;
-    }
-  </style>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-</head>
-<body><div id="chat"></div><div class="input-box">
-  <input type="text" id="mensagem" placeholder="Digite sua mensagem..." />
-  <button class="btn" onclick="enviarMensagem()">Enviar</button>
-  <button class="btn" onclick="toggleClipMenu()">📎</button>
-  <button class="btn" onclick="toggleUserList()">👥</button>
-</div><div id="clipOptions">
-  <button onclick="enviarImagem()">📷 Enviar Imagem</button><br>
-  <button onclick="iniciarGravacao()">🎤 Gravar Áudio</button>
-</div><div id="audioControls">
-  <span id="gravandoLabel">Gravando...</span>
-  <button class="audio-control-btn" onclick="pararGravacao()">Parar</button>
-  <button class="audio-control-btn" onclick="reproduzirAudio()">Reproduzir</button>
-  <button class="audio-control-btn" onclick="enviarAudio()">Enviar</button>
-</div><div id="userList">
-  <h3>Usuários Online</h3>
-  <div id="usuariosOnline"></div>
-</div><script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
-    authDomain: "mmchat-f4f88.firebaseapp.com",
-    databaseURL: "https://mmchat-f4f88-default-rtdb.firebaseio.com",
-    projectId: "mmchat-f4f88",
-    storageBucket: "mmchat-f4f88.appspot.com",
-    messagingSenderId: "404598754438",
-    appId: "1:404598754438:web:6a0892895591430d851507"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const storage = firebase.storage();
-  const db = firebase.database();
+    }#chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 
-  let recorder;
-  let audioChunks = [];
-  let audioBlob;
-  let audioURL;
+#messages {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  background: #ffffff;
+}
 
-  function toggleClipMenu() {
-    const menu = document.getElementById("clipOptions");
-    menu.style.display = menu.style.display === "block" ? "none" : "block";
-  }
+.message {
+  margin-bottom: 10px;
+}
 
-  function toggleUserList() {
-    const list = document.getElementById("userList");
-    list.style.display = list.style.display === "block" ? "none" : "block";
-  }
+#input-area {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #fff;
+  border-top: 1px solid #ccc;
+}
 
-  function iniciarGravacao() {
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-      recorder = new MediaRecorder(stream);
-      audioChunks = [];
-      recorder.ondataavailable = e => audioChunks.push(e.data);
-      recorder.onstop = () => {
-        audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-        audioURL = URL.createObjectURL(audioBlob);
-      };
-      recorder.start();
-      setTimeout(() => {
-        if (recorder.state === "recording") recorder.stop();
-      }, 60000);
-      document.getElementById("audioControls").style.display = "block";
-      document.getElementById("gravandoLabel").textContent = "Gravando...";
-    });
-  }
+#message-input {
+  flex: 1;
+  padding: 10px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
 
-  function pararGravacao() {
-    if (recorder && recorder.state === "recording") {
-      recorder.stop();
-      document.getElementById("gravandoLabel").textContent = "Áudio gravado.";
-    }
-  }
+#send-button, #clip-button, #users-button {
+  margin-left: 8px;
+  padding: 10px;
+  font-size: 1em;
+  border: none;
+  border-radius: 5px;
+  background-color: #4a90e2;
+  color: white;
+  cursor: pointer;
+}
 
-  function reproduzirAudio() {
-    if (audioURL) {
-      const audio = new Audio(audioURL);
-      audio.play();
-    }
-  }
+#clip-options {
+  display: none;
+  position: absolute;
 
-  function enviarAudio() {
-    if (audioBlob) {
-      const fileName = `audios/audio_${Date.now()}.webm`;
-      const uploadTask = storage.ref(fileName).put(audioBlob);
-
-      uploadTask.on('state_changed', 
-        null, 
-        (error) => console.error('Erro ao enviar áudio:', error), 
-        () => {
-          uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-            db.ref('mensagens').push({
-              tipo: 'audio',
-              url: downloadURL,
-              timestamp: Date.now()
-            });
-          });
-        }
-      );
-    }
-  }
-</script></body>
-</html>
