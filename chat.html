@@ -3,138 +3,186 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MMChat</title>
+  <title>MMChat - Sala</title>
   <style>
     body {
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f1f1f1;
+      padding: 0;
+      background-color: #eef1f5;
       display: flex;
       flex-direction: column;
       height: 100vh;
     }
-
-    header {
-      background-color: #4a90e2;
-      color: white;
-      padding: 10px;
-      text-align: center;
-      font-size: 1.2em;
-      position: relative;
-    }
-
-    #nickname {
-      font-weight: bold;
-    }
-
-    #sairBtn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #e74c3c;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
     #chat {
       flex: 1;
-      padding: 10px;
       overflow-y: auto;
-    }
-
-    .mensagem {
-      margin: 5px 0;
-      padding: 8px;
-      border-radius: 5px;
-      background-color: white;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    #entrada {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
       padding: 10px;
       background-color: #fff;
-      border-top: 1px solid #ccc;
     }
-
-    #mensagem {
+    .mensagem {
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+    .input-box {
+      display: flex;
+      padding: 10px;
+      background: #f0f2f5;
+    }
+    input[type="text"] {
       flex: 1;
       padding: 10px;
       font-size: 1em;
+      border-radius: 5px;
       border: 1px solid #ccc;
-      border-radius: 6px;
-      min-width: 60%;
     }
-
     button {
+      margin-left: 5px;
       padding: 10px;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
       background-color: #4a90e2;
       color: white;
-      border: none;
-      border-radius: 6px;
       cursor: pointer;
-      font-size: 0.9em;
     }
-
     #usuariosOnline {
-      max-height: 120px;
-      overflow-y: auto;
-      padding: 5px;
-      border-top: 1px solid #ccc;
-      background: #fff;
-      font-size: 0.9em;
-    }
-
-    .usuario {
-      padding: 5px;
-      border-bottom: 1px solid #eee;
-    }
-
-    .privado-box {
-      background-color: #eef;
+      background: #f9f9f9;
       padding: 10px;
-      margin-bottom: 5px;
-      border-radius: 5px;
-    }
-
-    .imagem-box, .audio-box {
-      margin-top: 10px;
-    }
-
-    .premium {
-      font-weight: bold;
-      color: gold;
-      text-shadow: 0 0 5px #f5c542;
+      border-top: 1px solid #ddd;
+      font-size: 0.9em;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    MMChat - Bem-vindo(a), <span id="nickname">Usuário</span>
-    <button id="sairBtn" onclick="sair()">Sair</button>
-  </header>
+<div id="chat"></div>
 
-  <div id="usuariosOnline"><strong>Usuários Online:</strong></div>
+<div class="input-box">
+  <input type="text" id="mensagem" placeholder="Digite sua mensagem..." />
+  <button onclick="enviarMensagem()">Enviar</button>
+  <button onclick="enviarImagem()">📷</button>
+  <button onclick="enviarAudio()">🎤</button>
+  <button onclick="verUsuarios()">👥</button>
+  <button onclick="sair()">🚪</button>
+</div>
 
-  <div id="chat"></div>
+<div id="usuariosOnline"></div>
 
-  <div id="entrada">
-    <input type="text" id="mensagem" placeholder="Digite sua mensagem..." />
-    <button onclick="enviarMensagem()">Enviar</button>
-    <button onclick="enviarImagem()">📷 Imagem</button>
-    <button onclick="enviarAudio()">🎤 Áudio</button>
-    <button onclick="verUsuarios()">👥 Ver Usuários</button>
-  </div>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
-  <div class="imagem-box" id="imagemBox" style="display:none;"></div>
-  <div class="audio-box" id="audioBox" style="display:none;"></div>
-  <div class="privado-box" id="mensagemPrivadaBox" style="display:none;"></div>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
+    authDomain: "mmchat-f4f88.firebaseapp.com",
+    databaseURL: "https://mmchat-f4f88-default-rtdb.firebaseio.com",
+    projectId: "mmchat-f4f88",
+    storageBucket: "mmchat-f4f88.appspot.com",
+    messagingSenderId: "404598754438",
+    appId: "1:404598754438:web:6a0892895591430d851507"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const database = firebase.database();
+  const storage = firebase.storage();
+
+  const uid = localStorage.getItem("uid") || "anônimo";
+  const horaEntrada = Date.now();
+  const mensagensRef = database.ref("mensagens");
+  const usuariosRef = database.ref("usuariosOnline");
+
+  usuariosRef.child(uid).set({ online: true });
+  usuariosRef.child(uid).onDisconnect().remove();
+
+  mensagensRef
+    .orderByChild("timestamp")
+    .startAt(horaEntrada)
+    .on("child_added", (snap) => {
+      const msg = snap.val();
+      const div = document.createElement("div");
+      div.className = "mensagem";
+
+      if (msg.tipo === "imagem") {
+        div.innerHTML = `<strong>${msg.nome || "Usuário"}:</strong><br><img src="${msg.url}" width="180"/>`;
+      } else if (msg.tipo === "audio") {
+        div.innerHTML = `<strong>${msg.nome || "Usuário"}:</strong><br><audio controls src="${msg.url}"></audio>`;
+      } else {
+        div.innerHTML = `<strong>${msg.nome || "Usuário"}:</strong> ${msg.texto}`;
+      }
+
+      document.getElementById("chat").appendChild(div);
+      document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
+    });
+
+  function enviarMensagem() {
+    const texto = document.getElementById("mensagem").value.trim();
+    if (texto === "") return;
+    mensagensRef.push({ texto, uid, nome: uid, timestamp: Date.now(), tipo: "texto" });
+    document.getElementById("mensagem").value = "";
+  }
+
+  function enviarImagem() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      const ref = storage.ref().child("imagens/" + Date.now() + "_" + file.name);
+      ref.put(file).then((snap) => {
+        snap.ref.getDownloadURL().then((url) => {
+          mensagensRef.push({ url, uid, nome: uid, timestamp: Date.now(), tipo: "imagem" });
+        });
+      });
+    };
+    input.click();
+  }
+
+  let recorder, audioChunks = [];
+  function enviarAudio() {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      recorder = new MediaRecorder(stream);
+      recorder.ondataavailable = e => audioChunks.push(e.data);
+      recorder.onstop = () => {
+        const blob = new Blob(audioChunks, { type: "audio/mp3" });
+        const ref = storage.ref().child("audios/" + Date.now() + ".mp3");
+        ref.put(blob).then(snap => {
+          snap.ref.getDownloadURL().then(url => {
+            mensagensRef.push({ url, uid, nome: uid, timestamp: Date.now(), tipo: "audio" });
+            audioChunks = [];
+          });
+        });
+      };
+      recorder.start();
+      setTimeout(() => recorder.stop(), 5000);
+      alert("Gravando áudio por 5 segundos...");
+    });
+  }
+
+  function verUsuarios() {
+    const box = document.getElementById("usuariosOnline");
+    box.innerHTML = "<strong>Usuários Online:</strong><br>";
+    usuariosRef.on("value", (snap) => {
+      box.innerHTML = "<strong>Usuários Online:</strong><br>";
+      snap.forEach((child) => {
+        const nome = child.key;
+        const item = document.createElement("div");
+        item.className = "usuario";
+        item.textContent = nome;
+        box.appendChild(item);
+      });
+    });
+  }
+
+  function sair() {
+    localStorage.removeItem("uid");
+    auth.signOut().then(() => window.location.href = "index.html");
+  }
+</script>
 
 </body>
 </html>
