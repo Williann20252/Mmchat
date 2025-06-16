@@ -1,65 +1,50 @@
 <!DOCTYPE html><html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MMChat - Entrada</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MMChat - Sala</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="index-body">
+<body class="chat-body">
   <header class="header-topo">
     <h1>MMChat</h1>
-  </header>  <main class="index-container">
-    <div class="card-login">
-      <h2>Bem-vindo ao MMChat</h2><input type="text" id="nickname" placeholder="Seu nome ou apelido" />
-  <button onclick="entrarComoAnonimo()">Entrar como Anônimo</button>
-
-  <hr class="divider" />
-
-  <input type="email" id="emailPremium" placeholder="Email Premium" />
-  <input type="password" id="senhaPremium" placeholder="Senha Premium" />
-  <button onclick="entrarComoPremium()">Entrar como Premium</button>
-
-  <p id="status" class="status-msg"></p>
+    <button id="btnSair">Sair</button>
+  </header>  <main class="chat-container">
+    <section id="chat" class="chat-mural"></section>
+  </main>  <div class="chat-controles">
+    <div class="input-area">
+      <input type="text" id="mensagem" placeholder="Digite sua mensagem..." />
+      <button id="btnEnviar">Enviar</button>
+    </div><div class="input-opcoes">
+  <label class="clip-menu">
+    📎
+    <input type="file" id="enviarImagem" accept="image/*" hidden>
+    <div class="clip-opcoes">
+      <label for="enviarImagem">📷 Imagem</label>
+      <button id="gravarAudio">🎤 Áudio</button>
+      <button id="btnUsuarios">👥 Ver usuários</button>
+    </div>
+  </label>
 </div>
 
-  </main>  <footer class="footer-base">
-    <p>MMChat © 2025 - Todos os direitos reservados</p>
-  </footer>  <!-- Firebase e Autenticação -->  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
-      authDomain: "mmchat-f4f88.firebaseapp.com",
-      databaseURL: "https://mmchat-f4f88-default-rtdb.firebaseio.com",
-      projectId: "mmchat-f4f88",
-      storageBucket: "mmchat-f4f88.appspot.com",
-      messagingSenderId: "404598754438",
-      appId: "1:404598754438:web:6a0892895591430d851507"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+<div class="custom-style">
+  <label>Fonte:
+    <select id="fonte">
+      <option>Arial</option>
+      <option>Verdana</option>
+      <option>Courier</option>
+    </select>
+  </label>
+  <label>Cor:
+    <input type="color" id="corFonte" value="#000000">
+  </label>
+  <button id="btnAplicar">Aplicar</button>
+</div>
 
-    function entrarComoAnonimo() {
-      const nickname = document.getElementById('nickname').value.trim();
-      if (!nickname) return alert("Digite um nome para continuar.");
-      localStorage.setItem("nickname", nickname);
-      localStorage.setItem("uid", "anon-" + Math.random().toString(36).substring(2));
-      localStorage.setItem("isPremium", "false");
-      window.location.href = "chat.html";
-    }
-
-    function entrarComoPremium() {
-      const email = document.getElementById('emailPremium').value;
-      const senha = document.getElementById('senhaPremium').value;
-
-      auth.signInWithEmailAndPassword(email, senha)
-        .then((cred) => {
-          localStorage.setItem("uid", cred.user.uid);
-          localStorage.setItem("nickname", document.getElementById('nickname').value || "Premium");
-          localStorage.setItem("isPremium", "true");
-          window.location.href = "chat.html";
-        })
-        .catch((error) => {
-          document.getElementById("status").textContent = "Erro: " + error.message;
-        });
-    }
-  </script></body>
+  </div>  <aside id="usuarios-lista" class="usuarios-painel hidden">
+    <h3>Usuários Online</h3>
+    <ul id="usuarios"></ul>
+  </aside>  <footer class="footer-base">
+    <p>MMChat © 2025</p>
+  </footer>  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>  <script src="chat.js"></script></body>
 </html>
