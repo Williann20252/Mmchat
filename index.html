@@ -1,111 +1,52 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!DOCTYPE html><html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MMChat - Acesso</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f9f9f9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .login-box {
-      background-color: white;
-      padding: 2em;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-      width: 90%;
-      max-width: 400px;
-    }
-    h2 {
-      text-align: center;
-      color: #4a90e2;
-      margin-bottom: 20px;
-    }
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      border-radius: 6px;
-      font-size: 1em;
-    }
-    input {
-      border: 1px solid #ccc;
-    }
-    button {
-      background-color: #4a90e2;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    #registro-box {
-      display: none;
-      margin-top: 20px;
-    }
-    .status {
-      margin-top: 10px;
-      color: red;
-      text-align: center;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MMChat - Entrar</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body class="login-body">
+  <div class="login-container">
+    <h1 class="login-title">MMChat</h1>
+    <p class="login-subtitle">Apenas digite seu apelido para entrar</p>
+    <input type="text" id="nickname" placeholder="Seu nick" class="login-input" maxlength="20"/>
+    <button onclick="entrarChat()" class="login-button">Entrar</button>
+    <p id="status" class="login-status"></p>
+  </div>  <!-- Firebase SDK -->  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
+      authDomain: "mmchat-f4f88.firebaseapp.com",
+      databaseURL: "https://mmchat-f4f88-default-rtdb.firebaseio.com",
+      projectId: "mmchat-f4f88",
+      storageBucket: "mmchat-f4f88.appspot.com",
+      messagingSenderId: "404598754438",
+      appId: "1:404598754438:web:6a0892895591430d851507"
+    };
 
-  <div class="login-box">
-    <h2>MMChat - Acesso</h2>
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    <input type="text" id="nick" placeholder="Digite seu nick" />
-    <button onclick="entrar()">Entrar como Anônimo</button>
+    function entrarChat() {
+      const nick = document.getElementById("nickname").value.trim();
+      const status = document.getElementById("status");
 
-    <div style="text-align:center; margin-top: 10px;">
-      <a href="#" onclick="mostrarRegistro()">Sou assinante</a>
-    </div>
-
-    <div id="registro-box">
-      <input type="password" id="codigoPremium" placeholder="Código do assinante" />
-      <button onclick="registrarPremium()">Entrar como Premium</button>
-    </div>
-
-    <div class="status" id="status"></div>
-  </div>
-
-  <script>
-    function entrar() {
-      const nick = document.getElementById("nick").value.trim();
-      if (!nick) {
-        document.getElementById("status").textContent = "Digite um nick para entrar.";
+      if (nick.length < 3) {
+        status.textContent = "Digite um nick com pelo menos 3 letras.";
         return;
       }
-      localStorage.setItem("nick", nick);
-      localStorage.setItem("premium", "nao");
-      window.location.href = "chat.html";
-    }
 
-    function mostrarRegistro() {
-      document.getElementById("registro-box").style.display = "block";
-    }
+      // Verifica se o nick está registrado como Premium
+      db.ref("usuarios/" + nick).once("value", (snapshot) => {
+        const dados = snapshot.val();
+        const tipo = dados && dados.premium ? "premium" : "anonimo";
 
-    function registrarPremium() {
-      const nick = document.getElementById("nick").value.trim();
-      const codigo = document.getElementById("codigoPremium").value.trim();
-      if (!nick || !codigo) {
-        document.getElementById("status").textContent = "Preencha o nick e o código.";
-        return;
-      }
-      if (codigo === "SECRETO123") { // <- Substitua pelo seu código real
+        // Salva no localStorage
         localStorage.setItem("nick", nick);
-        localStorage.setItem("premium", "sim");
-        window.location.href = "chat.html";
-      } else {
-        document.getElementById("status").textContent = "Código inválido.";
-      }
-    }
-  </script>
+        localStorage.setItem("tipo", tipo);
 
-</body>
+        // Redireciona para o chat
+        window.location.href = "chat.html";
+      });
+    }
+  </script></body>
 </html>
