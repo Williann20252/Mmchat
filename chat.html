@@ -1,44 +1,49 @@
 <!DOCTYPE html><html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MMChat - Sala</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MMChat</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="chat-container">
-    <header class="chat-header">
-      <h2>MMChat</h2>
-      <button id="sair">Sair</button>
-    </header><div class="chat-messages" id="chat"></div>
-
-<div class="chat-input-area">
-  <input type="text" id="mensagem" placeholder="Digite sua mensagem..." />
-  <button id="enviar">Enviar</button>
-  <div class="media-buttons">
-    <label class="upload-btn">
-      <input type="file" id="imagem" accept="image/*" hidden />
-      📷
-    </label>
-    <button id="gravar">🎤</button>
-    <button id="usuarios-btn">👥</button>
-  </div>
-</div>
-
-  </div>  <div id="usuarios-lista" class="usuarios-flutuante hidden">
-    <h4>Usuários online</h4>
+  <header>
+    <div class="logo">MMChat</div>
+    <button id="sair">Sair</button>
+  </header>  <main>
+    <section id="chat"></section>
+  </main>  <footer>
+    <div class="input-wrapper">
+      <input type="text" id="mensagem" placeholder="Digite sua mensagem...">
+      <button id="enviar">Enviar</button>
+    </div>
+    <div class="botoes-acao">
+      <div class="dropdown">
+        <button class="clip-btn">📎</button>
+        <div class="dropdown-content">
+          <label for="imagem">📷 Imagem</label>
+          <label for="gravar">🎤 Áudio</label>
+          <label for="usuarios-btn">👥 Ver usuários</label>
+        </div>
+      </div>
+    </div>
+  </footer>  <input type="file" id="imagem" accept="image/*" hidden>
+  <button id="gravar" hidden></button>
+  <div id="usuarios-lista" class="hidden">
+    <strong>Usuários online:</strong>
     <ul id="usuarios"></ul>
-  </div>  <div id="estilo-premium" class="estilo-flutuante hidden">
-    <h4>Personalize seu estilo</h4>
-    <label>Fonte:</label>
-    <select id="fonteSelect">
-      <option value="Arial">Arial</option>
-      <option value="Courier New">Courier</option>
-      <option value="Georgia">Georgia</option>
-      <option value="Verdana">Verdana</option>
-    </select>
-    <label>Cor:</label>
-    <input type="color" id="corSelect" />
-    <button id="aplicarEstilo">Aplicar</button>
-  </div>  <script src="firebase.js"></script>  <script src="chat.js"></script></body>
+  </div>  <div class="estilo-premium">
+    <strong>Personalize seu estilo</strong>
+    <div class="estilo-opcoes">
+      <label>Fonte:</label>
+      <select id="fonteSelect">
+        <option>Arial</option>
+        <option>Segoe UI</option>
+        <option>Verdana</option>
+        <option>Courier New</option>
+      </select>
+      <label>Cor:</label>
+      <input type="color" id="corSelect" value="#000000">
+      <button id="aplicarEstilo">Aplicar</button>
+    </div>
+  </div>  <script type="module" src="firebase.js"></script>  <script type="module" src="chat.js"></script></body>
 </html>
