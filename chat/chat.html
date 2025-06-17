@@ -1,30 +1,53 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!DOCTYPE html><html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MMChat - Sala de Chat</title>
+  <title>MMChat - Sala Geral</title>
   <link rel="stylesheet" href="chat.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="header">
+  <header class="chat-header">
     <h1>MMChat</h1>
-    <button id="logout">Sair</button>
-  </div>
+    <button id="configBtn">⚙️</button>
+    <button id="logoutBtn">Sair</button>
+  </header>  <main class="chat-container">
+    <section id="chat-mural" class="chat-mural"></section><div class="chat-input-area">
+  <input type="text" id="mensagemInput" placeholder="Digite sua mensagem..." />
+  <button id="enviarBtn">Enviar</button>
+</div>
 
-  <div class="chat-container">
-    <div class="messages" id="messages"></div>
-    <div class="input-container">
-      <input type="text" id="messageInput" placeholder="Digite sua mensagem..." onkeyup="checkEnter(event)" />
-      <button id="sendBtn" onclick="sendMessage()">Enviar</button>
-    </div>
-    <div class="action-buttons">
-      <button id="audioBtn" onclick="startRecording()">🎤</button>
-      <button id="imageBtn" onclick="uploadImage()">📷</button>
-      <button id="usersBtn" onclick="viewUsers()">👥</button>
-    </div>
-  </div>
+<div class="chat-tools">
+  <button id="imgBtn">📷</button>
+  <button id="audioBtn">🎤</button>
+  <button id="usuariosBtn">👥</button>
+</div>
 
-  <script src="chat.js"></script>
-</body>
+  </main>  <aside id="usuariosOnline" class="usuarios-sidebar hidden">
+    <h3>Usuários Online</h3>
+    <ul id="listaUsuarios"></ul>
+  </aside>  <!-- Painel de Configurações -->  <div id="painelConfig" class="painel-config hidden">
+    <h3>🎨 Configurações</h3>
+    <label>Fonte:
+      <select id="fonteSelect">
+        <option value="default">Padrão</option>
+        <option value="italic">Itálico</option>
+        <option value="bold">Negrito</option>
+        <option value="mono">Monoespaçada</option>
+      </select>
+    </label>
+    <label>Cor da Fonte:
+      <input type="color" id="corFonte">
+    </label>
+    <label>Cor do Nick:
+      <input type="color" id="corNick">
+    </label>
+    <label>
+      <input type="checkbox" id="ativarGradiente"> Gradiente Premium no Nick
+    </label>
+    <label>
+      <input type="checkbox" id="autoScroll"> Rolagem Automática
+    </label>
+    <button id="fecharConfig">Fechar</button>
+  </div>  <script src="chat.js"></script></body>
 </html>
