@@ -17,36 +17,33 @@
 </div>
 
 <div class="chat-tools">
-  <button id="imgBtn">📷</button>
   <button id="audioBtn">🎤</button>
+  <button id="imgBtn">📷</button>
   <button id="usuariosBtn">👥</button>
-  <button id="configBtn">⚙️</button>
+</div>
+
+<div class="chat-config">
+  <h3>Configurações</h3>
+  <label>Fonte:
+    <select id="fonteSelect">
+      <option value="Inter">Inter</option>
+      <option value="Arial">Arial</option>
+      <option value="Courier New">Courier New</option>
+    </select>
+  </label>
+  <label>Cor da fonte:
+    <input type="color" id="corFonteInput" value="#ffffff" />
+  </label>
+  <label>Cor do Nick:
+    <input type="color" id="corNickInput" value="#00bfff" />
+  </label>
+  <label><input type="checkbox" id="gradienteToggle" /> Gradiente Premium</label>
+  <label><input type="checkbox" id="autoScrollToggle" checked /> Rolagem automática</label>
+  <button id="aplicarEstiloBtn">Aplicar</button>
 </div>
 
   </main>  <aside id="usuariosOnline" class="usuarios-sidebar hidden">
     <h3>Usuários Online</h3>
     <ul id="listaUsuarios"></ul>
-  </aside>  <div id="painelConfig" class="painel-config hidden">
-    <h3>Configurações do Usuário</h3>
-    <label for="nickColor">Cor do Nick:</label>
-    <input type="color" id="nickColor"><label for="fontColor">Cor da Fonte:</label>
-<input type="color" id="fontColor">
-
-<label for="fontStyle">Fonte:</label>
-<select id="fontStyle">
-  <option value="Inter">Inter</option>
-  <option value="Arial">Arial</option>
-  <option value="Courier New">Courier New</option>
-  <option value="Georgia">Georgia</option>
-</select>
-
-<label for="gradiente">Nick com Gradiente (Premium):</label>
-<input type="checkbox" id="gradiente">
-
-<label for="autoScroll">Rolagem automática:</label>
-<input type="checkbox" id="autoScroll" checked>
-
-<button id="salvarConfig">Salvar</button>
-
-  </div>  <script src="chat.js"></script></body>
+  </aside>  <script src="chat.js"></script></body>
 </html>
