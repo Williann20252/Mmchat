@@ -1,94 +1,22 @@
-// Variables
-let users = ['Willian', 'Maria', 'João']; // Exemplo de usuários
-let isRecording = false;
-let mediaRecorder;
-let audioChunks = [];
+// chat.js COMPLETO com reconhecimento de nick
 
-// Function to send message
-function sendMessage() {
-  const messageInput = document.getElementById('messageInput');
-  const message = messageInput.value.trim();
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"; import { getDatabase, ref, push, onChildAdded, remove, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-  if (message) {
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message', 'sent');
-    messageDiv.innerHTML = `<span class="user">Você:</span><p class="text">${message}</p>`;
-    document.getElementById('messages').appendChild(messageDiv);
-    messageInput.value = ''; // Clear the input
-    messageDiv.scrollIntoView();
-  }
-}
+const firebaseConfig = { apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg", authDomain: "mmchat-f4f88.firebaseapp.com", databaseURL: "https://mmchat-f4f88-default-rtdb.firebaseio.com", projectId: "mmchat-f4f88", storageBucket: "mmchat-f4f88.appspot.com", messagingSenderId: "404598754438", appId: "1:404598754438:web:6a0892895591430d851507" };
 
-// Function to handle Enter key
-function checkEnter(event) {
-  if (event.key === 'Enter') {
-    sendMessage();
-  }
-}
+const app = initializeApp(firebaseConfig); const database = getDatabase(app);
 
-// Function to start audio recording
-function startRecording() {
-  if (isRecording) {
-    mediaRecorder.stop();
-    document.getElementById('audioBtn').textContent = '🎤';
-    isRecording = false;
-  } else {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then((stream) => {
-        mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.start();
-        document.getElementById('audioBtn').textContent = '⏸️';
-        isRecording = true;
+const nickname = localStorage.getItem("nickname") || "Anônimo"; const mural = document.getElementById("mural"); const inputMensagem = document.getElementById("mensagem"); const botaoEnviar = document.getElementById("enviar");
 
-        mediaRecorder.ondataavailable = (event) => {
-          audioChunks.push(event.data);
-        };
+function enviarMensagem() { const texto = inputMensagem.value.trim(); if (texto) { const novaMsg = { nick: nickname, texto: texto, timestamp: Date.now() }; push(ref(database, "mensagens"), novaMsg); inputMensagem.value = ""; } }
 
-        mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          const audio = new Audio(audioUrl);
-          audio.play();
+botaoEnviar.addEventListener("click", enviarMensagem); inputMensagem.addEventListener("keypress", function(e) { if (e.key === "Enter") enviarMensagem(); });
 
-          // Display audio message
-          const messageDiv = document.createElement('div');
-          messageDiv.classList.add('message', 'sent');
-          messageDiv.innerHTML = `<span class="user">Você:</span><p class="text">Áudio gravado</p>`;
-          document.getElementById('messages').appendChild(messageDiv);
-          messageDiv.scrollIntoView();
-        };
-      })
-      .catch((err) => {
-        console.error('Error accessing audio:', err);
-      });
-  }
-}
+onChildAdded(ref(database, "mensagens"), (data) => { const msg = data.val(); const div = document.createElement("div"); div.classList.add("mensagem"); const remetente = msg.nick === nickname ? @${nickname} : @${msg.nick}; div.innerHTML = <strong>${remetente}:</strong> ${msg.texto}; mural.appendChild(div); mural.scrollTop = mural.scrollHeight; });
 
-// Function to upload image
-function uploadImage() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*';
-  input.click();
-  
-  input.onchange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const messageDiv = document.createElement('div');
-      messageDiv.classList.add('message', 'sent');
-      messageDiv.innerHTML = `<span class="user">Você:</span><p class="text">Imagem enviada: ${file.name}</p>`;
-      document.getElementById('messages').appendChild(messageDiv);
-      messageDiv.scrollIntoView();
-    }
-  };
-}
+// Botão sair const botaoSair = document.getElementById("sair"); if (botaoSair) { botaoSair.addEventListener("click", () => { localStorage.clear(); window.location.href = "../index.html"; }); }
 
-// Function to view online users
-function viewUsers() {
-  alert('Usuários online: ' + users.join(', '));
-}
+// Exemplo de listeners para botões de imagem e áudio (personalize conforme necessário) const botaoImagem = document.getElementById("imagem"); const botaoAudio = document.getElementById("audio");
 
-// Function to handle logout
-document.getElementById('logout').addEventListener('click', () => {
-  window.location.href = '/';
-});
+if (botaoImagem) botaoImagem.addEventListener("click", () => alert("Função de imagem em desenvolvimento")); if (botaoAudio) botaoAudio.addEventListener("click", () => alert("Função de áudio em desenvolvimento"));
+
