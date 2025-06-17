@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MMChat - Sala Geral</title>
+  <link rel="stylesheet" href="chat.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="chat-header">
+    <h1>MMChat</h1>
+    <div class="user-config">
+      <button id="configBtn">⚙️</button>
+      <button id="logoutBtn">Sair</button>
+    </div>
+  </header>
+
+  <main class="chat-container">
+    <section id="chat-mural" class="chat-mural"></section>
+
+    <div class="chat-input-area">
+      <input type="text" id="mensagemInput" placeholder="Digite sua mensagem..."/>
+      <button id="enviarBtn">Enviar</button>
+    </div>
+
+    <div class="chat-tools">
+      <label for="audioInput" class="tool-btn">🎤</label>
+      <input type="file" accept="audio/*" id="audioInput" class="hidden" />
+      
+      <label for="imgInput" class="tool-btn">📷</label>
+      <input type="file" accept="image/*" id="imgInput" class="hidden" />
+
+      <button id="usuariosBtn" class="tool-btn">👥</button>
+    </div>
+  </main>
+
+  <aside id="usuariosOnline" class="usuarios-sidebar hidden">
+    <h3>Usuários Online</h3>
+    <ul id="listaUsuarios"></ul>
+  </aside>
+
+  <section id="configuracoesUsuario" class="config-menu hidden">
+    <h3>Configurações</h3>
+    <label for="nickColor">Cor do Nick:</label>
+    <input type="color" id="nickColor" />
+
+    <label for="fonteSelect">Fonte:</label>
+    <select id="fonteSelect">
+      <option value="Inter">Inter</option>
+      <option value="Arial">Arial</option>
+      <option value="Courier New">Courier New</option>
+    </select>
+
+    <label for="scrollToggle">Rolagem Automática:</label>
+    <input type="checkbox" id="scrollToggle" checked />
+    
+    <button id="salvarConfig">Salvar</button>
+  </section>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="chat.js"></script>
+</body>
+</html>
