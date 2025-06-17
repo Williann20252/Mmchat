@@ -1,4 +1,40 @@
-// chat.js COMPLETO com reconhecimento de nick
+// chat.js COMPLETO com // chat.js
+
+const mural = document.getElementById("chat-mural"); const input = document.getElementById("mensagemInput"); const enviarBtn = document.getElementById("enviarBtn"); const logoutBtn = document.getElementById("logoutBtn"); const usuariosBtn = document.getElementById("usuariosBtn"); const usuariosOnline = document.getElementById("usuariosOnline"); const listaUsuarios = document.getElementById("listaUsuarios"); const configBtn = document.getElementById("configBtn"); const painelConfiguracoes = document.getElementById("painelConfiguracoes"); const fecharConfig = document.getElementById("fecharConfig");
+
+// Configurações do usuário let corFonte = "#000000"; let corNick = "#000000"; let estiloFonte = "normal"; let usarGradiente = false; let rolagemAutomatica = true;
+
+// Apelido do usuário const nickname = localStorage.getItem("nickname") || "Usuário"; const userType = localStorage.getItem("userType") || "anonimo";
+
+// Enviar mensagem function enviarMensagem() { const texto = input.value.trim(); if (!texto) return;
+
+const msg = document.createElement("div"); msg.classList.add("mensagem"); msg.innerHTML = <strong style="color: ${corNick}; font-weight: bold; font-style: ${estiloFonte}; ${usarGradiente && userType === 'premium' ? 'background: linear-gradient(to right, #00f, #f0f); -webkit-background-clip: text; -webkit-text-fill-color: transparent;' : ''}">@${nickname}:</strong> <span style="color: ${corFonte}; font-style: ${estiloFonte};">${texto}</span>; mural.appendChild(msg);
+
+input.value = ""; if (rolagemAutomatica) mural.scrollTop = mural.scrollHeight; }
+
+enviarBtn.addEventListener("click", enviarMensagem); input.addEventListener("keypress", e => { if (e.key === "Enter") enviarMensagem(); });
+
+logoutBtn.addEventListener("click", () => { localStorage.clear(); window.location.href = "../index.html"; });
+
+usuariosBtn.addEventListener("click", () => { usuariosOnline.classList.toggle("hidden"); });
+
+// Simular lista de usuários online const usuarios = ["@Maria", "@João", "@Ana"]; usuarios.forEach(user => { const li = document.createElement("li"); li.textContent = user; listaUsuarios.appendChild(li); });
+
+// Menu de configurações configBtn.addEventListener("click", () => { painelConfiguracoes.classList.toggle("hidden"); });
+
+fecharConfig.addEventListener("click", () => { painelConfiguracoes.classList.add("hidden"); });
+
+document.getElementById("corFonte").addEventListener("input", e => { corFonte = e.target.value; });
+
+document.getElementById("corNick").addEventListener("input", e => { corNick = e.target.value; });
+
+document.getElementById("estiloFonte").addEventListener("change", e => { estiloFonte = e.target.value; });
+
+document.getElementById("gradienteCheck").addEventListener("change", e => { usarGradiente = e.target.checked; });
+
+document.getElementById("rolagemAuto").addEventListener("change", e => { rolagemAutomatica = e.target.checked; });
+
+ de nick
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"; import { getDatabase, ref, push, onChildAdded, remove, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
