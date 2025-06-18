@@ -1,6 +1,6 @@
-// chat.js com suporte a mensagens privadas por solicitação com aceite
+// chat.js atualizado com sistema de mensagens privadas funcionais e botões operando corretamente
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"; import { getDatabase, ref, set, push, onChildAdded, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"; import { getDatabase, ref, set, push, onChildAdded, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = { apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg", authDomain: "mmchat-f4f88.firebaseapp.com", databaseURL: "https://mmchat-f4f88-default-rtdb.firebaseio.com", projectId: "mmchat-f4f88", storageBucket: "mmchat-f4f88.appspot.com", messagingSenderId: "404598754438", appId: "1:404598754438:web:6a0892895591430d851507" };
 
@@ -12,19 +12,17 @@ const mural = document.getElementById("chat-mural"); const input = document.getE
 
 const userRef = ref(db, "onlineUsers/" + uid); set(userRef, nickname); window.addEventListener("beforeunload", () => remove(userRef));
 
-onValue(ref(db, "onlineUsers"), (snapshot) => { listaUsuarios.innerHTML = ""; const data = snapshot.val() || {}; Object.entries(data).forEach(([id, name]) => { const li = document.createElement("li"); li.textContent = name; li.onclick = () => solicitarPV(id, name); listaUsuarios.appendChild(li); }); });
+onValue(ref(db, "onlineUsers"), (snapshot) => { listaUsuarios.innerHTML = ""; const data = snapshot.val() || {}; Object.entries(data).forEach(([key, name]) => { const li = document.createElement("li"); li.textContent = name; if (key !== uid) { li.addEventListener("click", () => solicitarPV(key, name)); } listaUsuarios.appendChild(li); }); });
 
 function solicitarPV(destUid, destNick) { push(ref(db, "pvSolicitacoes"), { deUid: uid, deNick: nickname, paraUid: destUid, paraNick: destNick, status: "pendente" }); }
 
-onChildAdded(ref(db, "pvSolicitacoes"), (snap) => { const s = snap.val(); if (s.paraUid === uid && s.status === "pendente") { const div = document.createElement("div"); div.innerHTML = <strong>@${s.deNick}</strong> deseja enviar mensagem reservada.  + <button onclick="aceitarPV('${snap.key}', '${s.deUid}', '${s.deNick}')">Aceitar</button> +  <button onclick="recusarPV('${snap.key}')">Recusar</button>; mural.appendChild(div); } });
+onChildAdded(ref(db, "pvSolicitacoes"), (snap) => { const s = snap.val(); if (s.paraUid === uid && s.status === "pendente") { const div = document.createElement("div"); div.innerHTML = <strong>@${s.deNick}</strong> deseja enviar mensagem reservada.  <button class='aceitarPV' data-id='${snap.key}'>Aceitar</button>  <button class='recusarPV' data-id='${snap.key}'>Recusar</button>; mural.appendChild(div); } });
 
-window.aceitarPV = (key, deUid, deNick) => { update(ref(db, "pvSolicitacoes/" + key), { status: "aceito" }); push(ref(db, "mensagens"), { nick: nickname, uid: uid, tipo: "texto", conteudo: Você agora pode conversar reservadamente com @${deNick}, reservado: [uid, deUid], hora: Date.now() }); };
-
-window.recusarPV = (key) => { update(ref(db, "pvSolicitacoes/" + key), { status: "recusado" }); };
+document.addEventListener("click", (e) => { if (e.target.classList.contains("aceitarPV")) { const key = e.target.dataset.id; update(ref(db, pvSolicitacoes/${key}), { status: "aceito" }); } if (e.target.classList.contains("recusarPV")) { const key = e.target.dataset.id; update(ref(db, pvSolicitacoes/${key}), { status: "recusado" }); } });
 
 function enviarMensagem() { const texto = input.value.trim(); if (!texto) return; push(ref(db, "mensagens"), { nick: nickname, uid: uid, tipo: "texto", conteudo: texto, hora: Date.now() }); input.value = ""; } enviarBtn.onclick = enviarMensagem; input.addEventListener("keydown", (e) => { if (e.key === "Enter") enviarMensagem(); });
 
-onChildAdded(ref(db, "mensagens"), (snap) => { const msg = snap.val(); if (msg.reservado && !msg.reservado.includes(uid)) return;
+onChildAdded(ref(db, "mensagens"), (snap) => { const msg = snap.val(); if (msg.reservado && msg.reservado !== uid && msg.uid !== uid) return;
 
 const div = document.createElement("div"); const nickSpan = document.createElement("span"); nickSpan.textContent = @${msg.nick}: ; nickSpan.style.fontWeight = "bold"; nickSpan.style.color = msg.uid === uid ? "#00ffff" : "#ff00ff"; div.appendChild(nickSpan);
 
@@ -34,7 +32,13 @@ mural.appendChild(div); if (document.getElementById("rolagemAuto")?.checked ?? t
 
 imgBtn.onclick = () => { const fileInput = document.createElement("input"); fileInput.type = "file"; fileInput.accept = "image/*"; fileInput.onchange = () => { const file = fileInput.files[0]; const reader = new FileReader(); reader.onload = () => { push(ref(db, "mensagens"), { nick: nickname, uid: uid, tipo: "img", conteudo: reader.result, hora: Date.now() }); }; reader.readAsDataURL(file); }; fileInput.click(); };
 
-audioBtn.onclick = async () => { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); const recorder = new MediaRecorder(stream); const chunks = []; recorder.ondataavailable = (e) => chunks.push(e.data); recorder.onstop = () => { const blob = new Blob(chunks, { type: "audio/webm" }); const reader = new FileReader(); reader.onloadend = () => { push(ref(db, "mensagens"), { nick: nickname, uid: uid, tipo: "audio", conteudo: reader.result, hora: Date.now() }); }; reader.readAsDataURL(blob); }; recorder.start(); setTimeout(() => recorder.stop(), 60000); alert("Gravando... será enviado automaticamente após 60s."); };
+audioBtn.onclick = async () => { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); const recorder = new MediaRecorder(stream); const chunks = [];
 
-usuariosBtn.onclick = () => { painelUsuarios.classList.toggle("show"); }; fecharUsuarios.onclick = () => { painelUsuarios.classList.remove("show"); }; configBtn.onclick = () => { painelConfig.classList.toggle("show"); }; logoutBtn.onclick = () => { remove(userRef); localStorage.clear(); window.location.href = "../index.html"; };
+recorder.ondataavailable = (e) => chunks.push(e.data); recorder.onstop = () => { const blob = new Blob(chunks, { type: "audio/webm" }); const reader = new FileReader(); reader.onloadend = () => { push(ref(db, "mensagens"), { nick: nickname, uid: uid, tipo: "audio", conteudo: reader.result, hora: Date.now() }); }; reader.readAsDataURL(blob); };
+
+recorder.start(); setTimeout(() => recorder.stop(), 60000); alert("Gravando... será enviado automaticamente após 60s."); };
+
+usuariosBtn.onclick = () => painelUsuarios.classList.toggle("show"); fecharUsuarios.onclick = () => painelUsuarios.classList.remove("show"); configBtn.onclick = () => painelConfig.classList.toggle("show");
+
+logoutBtn.onclick = () => { remove(userRef); localStorage.clear(); window.location.href = "../index.html"; };
 
