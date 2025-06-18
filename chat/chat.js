@@ -10,7 +10,7 @@ import {
   update
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-// 🔧 Firebase Config
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
   authDomain: "mmchat-f4f88.firebaseapp.com",
@@ -20,10 +20,12 @@ const firebaseConfig = {
   messagingSenderId: "404598754438",
   appId: "1:404598754438:web:6a0892895591430d851507"
 };
+
+// Inicializa Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// 🔐 Usuário
+// Dados do usuário
 const nickname = localStorage.getItem("nickname") || "Anônimo";
 let uid = localStorage.getItem("uid");
 if (!uid) {
@@ -31,7 +33,7 @@ if (!uid) {
   localStorage.setItem("uid", uid);
 }
 
-// 🎯 Elementos DOM
+// Elementos DOM
 const mural = document.getElementById("chat-mural");
 const input = document.getElementById("mensagemInput");
 const enviarBtn = document.getElementById("enviarBtn");
@@ -45,26 +47,26 @@ const painelUsuarios = document.getElementById("usuariosOnline");
 const painelConfig = document.getElementById("configPainel");
 const fecharUsuarios = document.getElementById("fecharUsuarios");
 
-// ✅ Marcar Online
+// Marcar como online
 const userRef = ref(db, "onlineUsers/" + uid);
 set(userRef, nickname);
 window.addEventListener("beforeunload", () => remove(userRef));
 
-// 🔄 Lista de Usuários Online
-onValue(ref(db, "onlineUsers"), (snap) => {
+// Atualizar lista de usuários
+onValue(ref(db, "onlineUsers"), (snapshot) => {
   listaUsuarios.innerHTML = "";
-  const data = snap.val() || {};
+  const data = snapshot.val() || {};
   Object.entries(data).forEach(([key, name]) => {
     const li = document.createElement("li");
     li.textContent = name;
     if (key !== uid) {
-      li.onclick = () => solicitarPV(key, name);
+      li.addEventListener("click", () => solicitarPV(key, name));
     }
     listaUsuarios.appendChild(li);
   });
 });
 
-// 🔒 Solicitar PV
+// Solicitar PV
 function solicitarPV(destUid, destNick) {
   push(ref(db, "pvSolicitacoes"), {
     deUid: uid,
@@ -75,20 +77,22 @@ function solicitarPV(destUid, destNick) {
   });
 }
 
-// 🔔 Ouvir PV
+// Ouvir solicitações de PV
 onChildAdded(ref(db, "pvSolicitacoes"), (snap) => {
   const s = snap.val();
   if (s.paraUid === uid && s.status === "pendente") {
     const div = document.createElement("div");
     div.className = "msg-pv";
-    div.innerHTML = `<strong>@${s.deNick}</strong> deseja conversar reservadamente. 
-      <button class="aceitarPV" data-id="${snap.key}">Aceitar</button> 
-      <button class="recusarPV" data-id="${snap.key}">Recusar</button>`;
+    div.innerHTML = `
+      <strong>@${s.deNick}</strong> deseja conversar reservadamente.
+      <button class='aceitarPV' data-id='${snap.key}'>Aceitar</button>
+      <button class='recusarPV' data-id='${snap.key}'>Recusar</button>
+    `;
     mural.appendChild(div);
   }
 });
 
-// 🧠 Atender ou Recusar PV
+// Responder PV
 document.addEventListener("click", (e) => {
   const key = e.target.dataset?.id;
   if (e.target.classList.contains("aceitarPV")) {
@@ -99,13 +103,13 @@ document.addEventListener("click", (e) => {
   }
 });
 
-// 💬 Enviar mensagem
+// Enviar mensagem
 function enviarMensagem() {
   const texto = input.value.trim();
   if (!texto) return;
   push(ref(db, "mensagens"), {
     nick: nickname,
-    uid,
+    uid: uid,
     tipo: "texto",
     conteudo: texto,
     hora: Date.now()
@@ -117,9 +121,10 @@ input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") enviarMensagem();
 });
 
-// 📩 Receber mensagens
+// Exibir mensagens
 onChildAdded(ref(db, "mensagens"), (snap) => {
   const msg = snap.val();
+
   const div = document.createElement("div");
   const nickSpan = document.createElement("span");
   nickSpan.textContent = `@${msg.nick}: `;
@@ -155,7 +160,7 @@ onChildAdded(ref(db, "mensagens"), (snap) => {
   }
 });
 
-// 🖼️ Enviar imagem
+// Enviar imagem
 imgBtn.onclick = () => {
   const fileInput = document.createElement("input");
   fileInput.type = "file";
@@ -166,7 +171,7 @@ imgBtn.onclick = () => {
     reader.onload = () => {
       push(ref(db, "mensagens"), {
         nick: nickname,
-        uid,
+        uid: uid,
         tipo: "img",
         conteudo: reader.result,
         hora: Date.now()
@@ -177,11 +182,12 @@ imgBtn.onclick = () => {
   fileInput.click();
 };
 
-// 🎤 Gravar áudio
+// Gravar áudio
 audioBtn.onclick = async () => {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   const recorder = new MediaRecorder(stream);
   const chunks = [];
+
   recorder.ondataavailable = (e) => chunks.push(e.data);
   recorder.onstop = () => {
     const blob = new Blob(chunks, { type: "audio/webm" });
@@ -189,7 +195,7 @@ audioBtn.onclick = async () => {
     reader.onloadend = () => {
       push(ref(db, "mensagens"), {
         nick: nickname,
-        uid,
+        uid: uid,
         tipo: "audio",
         conteudo: reader.result,
         hora: Date.now()
@@ -197,17 +203,18 @@ audioBtn.onclick = async () => {
     };
     reader.readAsDataURL(blob);
   };
+
   recorder.start();
   setTimeout(() => recorder.stop(), 60000);
   alert("Gravando... será enviado automaticamente após 60s.");
 };
 
-// 🪟 Painéis flutuantes
+// Botões visuais
 usuariosBtn.onclick = () => painelUsuarios.classList.toggle("show");
 fecharUsuarios.onclick = () => painelUsuarios.classList.remove("show");
 configBtn.onclick = () => painelConfig.classList.toggle("show");
 
-// 🔚 Logout
+// Logout
 logoutBtn.onclick = () => {
   remove(userRef);
   localStorage.clear();
