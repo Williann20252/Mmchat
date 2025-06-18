@@ -1,201 +1,65 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getDatabase,
-  ref,
-  set,
-  push,
-  onChildAdded,
-  onValue,
-  remove
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MMChat - Sala Geral</title>
+  <link rel="stylesheet" href="chat.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="chat-header">
+    <h1>MMChat</h1>
+    <button id="logoutBtn">Sair</button>
+  </header>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
-  authDomain: "mmchat-f4f88.firebaseapp.com",
-  databaseURL: "https://mmchat-f4f88-default-rtdb.firebaseio.com",
-  projectId: "mmchat-f4f88",
-  storageBucket: "mmchat-f4f88.appspot.com",
-  messagingSenderId: "404598754438",
-  appId: "1:404598754438:web:6a0892895591430d851507"
-};
+  <main class="chat-container">
+    <section id="chat-mural" class="chat-mural"></section>
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+    <div class="chat-input-area">
+      <input type="text" id="mensagemInput" placeholder="Digite sua mensagem..." />
+      <button id="enviarBtn">Enviar</button>
+    </div>
 
-// Identificação
-const nickname = localStorage.getItem("nickname") || "Anônimo";
-let uid = localStorage.getItem("uid");
-if (!uid) {
-  uid = "user_" + Math.random().toString(36).substring(2, 10);
-  localStorage.setItem("uid", uid);
-}
+    <div class="chat-tools">
+      <button id="imgBtn" title="Enviar imagem">📷</button>
+      <button id="audioBtn" title="Gravar áudio">🎤</button>
+      <button id="usuariosBtn" title="Usuários online">👥</button>
+      <button id="configBtn" title="Abrir configurações">⚙️</button>
+    </div>
+  </main>
 
-// Elementos DOM
-const mural = document.getElementById("chat-mural");
-const input = document.getElementById("mensagemInput");
-const enviarBtn = document.getElementById("enviarBtn");
-const usuariosBtn = document.getElementById("usuariosBtn");
-const configBtn = document.getElementById("configBtn");
-const configPainel = document.getElementById("configPainel");
-const listaUsuarios = document.getElementById("listaUsuarios");
-const logoutBtn = document.getElementById("logoutBtn");
-const imgBtn = document.getElementById("imgBtn");
-const audioBtn = document.getElementById("audioBtn");
+  <!-- Painel de usuários online -->
+  <aside id="usuariosOnline" class="usuarios-sidebar">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h3>Usuários Online</h3>
+      <button id="fecharUsuarios" style="background: transparent; color: white; border: none; font-size: 1.2rem; cursor: pointer;">✖️</button>
+    </div>
+    <ul id="listaUsuarios"></ul>
+  </aside>
 
-// Marcar online
-const userRef = ref(db, "onlineUsers/" + uid);
-set(userRef, nickname);
-window.addEventListener("beforeunload", () => remove(userRef));
+  <!-- Painel de configurações -->
+  <aside id="configPainel" class="config-sidebar">
+    <h3>⚙️ Configurações</h3>
+    <label>Cor da fonte:
+      <input type="color" id="corFonte" />
+    </label><br /><br />
 
-// Exibir usuários online
-onValue(ref(db, "onlineUsers"), (snapshot) => {
-  listaUsuarios.innerHTML = "";
-  const data = snapshot.val() || {};
-  Object.values(data).forEach((name) => {
-    const li = document.createElement("li");
-    li.textContent = name;
-    listaUsuarios.appendChild(li);
-  });
-});
+    <label>Cor do nick:
+      <input type="color" id="corNick" />
+    </label><br /><br />
 
-// Enviar mensagem
-function enviarMensagem() {
-  const texto = input.value.trim();
-  if (!texto) return;
-  push(ref(db, "mensagens"), {
-    nick: nickname,
-    uid: uid,
-    tipo: "texto",
-    conteudo: texto,
-    hora: Date.now()
-  });
-  input.value = "";
-}
+    <label>
+      <input type="checkbox" id="rolagemAuto" checked />
+      Rolagem automática
+    </label><br /><br />
 
-enviarBtn.onclick = enviarMensagem;
-input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") enviarMensagem();
-});
+    <label>
+      <input type="checkbox" id="gradienteNick" />
+      Gradiente no nick (Premium)
+    </label>
+  </aside>
 
-// Aplicar configurações
-function aplicarEstilo(div, msg) {
-  const corFonte = document.getElementById("corFonte")?.value || "#000";
-  const corNick = document.getElementById("corNick")?.value || "#000";
-  const gradiente = document.getElementById("gradienteNick")?.checked;
-
-  div.style.color = corFonte;
-
-  const nickSpan = document.createElement("span");
-  nickSpan.textContent = `@${msg.nick}: `;
-  nickSpan.style.fontWeight = "bold";
-
-  if (gradiente && msg.uid === uid) {
-    nickSpan.style.background = "linear-gradient(90deg, #00ffff, #ff00ff)";
-    nickSpan.style.webkitBackgroundClip = "text";
-    nickSpan.style.webkitTextFillColor = "transparent";
-  } else {
-    nickSpan.style.color = msg.uid === uid ? corNick : "#4da8da";
-  }
-
-  div.appendChild(nickSpan);
-  return div;
-}
-
-// Exibir mensagens
-onChildAdded(ref(db, "mensagens"), (snapshot) => {
-  const msg = snapshot.val();
-  const div = document.createElement("div");
-  aplicarEstilo(div, msg);
-
-  if (msg.tipo === "texto") {
-    div.innerHTML += msg.conteudo;
-  } else if (msg.tipo === "img") {
-    const toggleBtn = document.createElement("button");
-    toggleBtn.textContent = "Ver imagem";
-    toggleBtn.onclick = () => {
-      img.style.display = img.style.display === "none" ? "block" : "none";
-      toggleBtn.textContent = img.style.display === "none" ? "Ver imagem" : "Ocultar";
-    };
-    const img = document.createElement("img");
-    img.src = msg.conteudo;
-    img.style.maxWidth = "100%";
-    img.style.display = "none";
-    div.appendChild(toggleBtn);
-    div.appendChild(img);
-  } else if (msg.tipo === "audio") {
-    const audio = document.createElement("audio");
-    audio.src = msg.conteudo;
-    audio.controls = true;
-    div.appendChild(audio);
-  }
-
-  mural.appendChild(div);
-  if (document.getElementById("rolagemAuto")?.checked ?? true) {
-    mural.scrollTop = mural.scrollHeight;
-  }
-});
-
-// Enviar imagem
-imgBtn.onclick = () => {
-  const fileInput = document.createElement("input");
-  fileInput.type = "file";
-  fileInput.accept = "image/*";
-  fileInput.onchange = () => {
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-      push(ref(db, "mensagens"), {
-        nick: nickname,
-        uid: uid,
-        tipo: "img",
-        conteudo: reader.result,
-        hora: Date.now()
-      });
-    };
-    reader.readAsDataURL(file);
-  };
-  fileInput.click();
-};
-
-// Gravar áudio
-audioBtn.onclick = async () => {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  const recorder = new MediaRecorder(stream);
-  const chunks = [];
-
-  recorder.ondataavailable = (e) => chunks.push(e.data);
-  recorder.onstop = () => {
-    const blob = new Blob(chunks, { type: "audio/webm" });
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      push(ref(db, "mensagens"), {
-        nick: nickname,
-        uid: uid,
-        tipo: "audio",
-        conteudo: reader.result,
-        hora: Date.now()
-      });
-    };
-    reader.readAsDataURL(blob);
-  };
-
-  recorder.start();
-  setTimeout(() => recorder.stop(), 60000);
-  alert("Gravando... será enviado automaticamente após 60s.");
-};
-
-// Alternar visibilidade de painéis
-usuariosBtn.onclick = () => {
-  document.getElementById("usuariosOnline").classList.toggle("show");
-};
-
-configBtn.onclick = () => {
-  configPainel.classList.toggle("show");
-};
-
-// Logout
-logoutBtn.onclick = () => {
-  remove(userRef);
-  localStorage.clear();
-  window.location.href = "index.html";
-};
+  <script type="module" src="chat.js"></script>
+</body>
+</html>
