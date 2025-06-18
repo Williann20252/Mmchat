@@ -1,4 +1,4 @@
-// chat.js atualizado com sistema de mensagens privadas funcionais e botões operando corretamente
+// chat.js corrigido com sistema de PV e botoes funcionando corretamente
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"; import { getDatabase, ref, set, push, onChildAdded, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
@@ -16,15 +16,30 @@ onValue(ref(db, "onlineUsers"), (snapshot) => { listaUsuarios.innerHTML = ""; co
 
 function solicitarPV(destUid, destNick) { push(ref(db, "pvSolicitacoes"), { deUid: uid, deNick: nickname, paraUid: destUid, paraNick: destNick, status: "pendente" }); }
 
-onChildAdded(ref(db, "pvSolicitacoes"), (snap) => { const s = snap.val(); if (s.paraUid === uid && s.status === "pendente") { const div = document.createElement("div"); div.innerHTML = <strong>@${s.deNick}</strong> deseja enviar mensagem reservada.  <button class='aceitarPV' data-id='${snap.key}'>Aceitar</button>  <button class='recusarPV' data-id='${snap.key}'>Recusar</button>; mural.appendChild(div); } });
+onChildAdded(ref(db, "pvSolicitacoes"), (snap) => { const s = snap.val(); if (s.paraUid === uid && s.status === "pendente") { const div = document.createElement("div"); const msg = document.createElement("strong"); msg.textContent = @${s.deNick} deseja enviar mensagem reservada.;
+
+const btnAceitar = document.createElement("button");
+btnAceitar.textContent = "Aceitar";
+btnAceitar.classList.add("aceitarPV");
+btnAceitar.dataset.id = snap.key;
+
+const btnRecusar = document.createElement("button");
+btnRecusar.textContent = "Recusar";
+btnRecusar.classList.add("recusarPV");
+btnRecusar.dataset.id = snap.key;
+
+div.appendChild(msg);
+div.appendChild(btnAceitar);
+div.appendChild(btnRecusar);
+mural.appendChild(div);
+
+} });
 
 document.addEventListener("click", (e) => { if (e.target.classList.contains("aceitarPV")) { const key = e.target.dataset.id; update(ref(db, pvSolicitacoes/${key}), { status: "aceito" }); } if (e.target.classList.contains("recusarPV")) { const key = e.target.dataset.id; update(ref(db, pvSolicitacoes/${key}), { status: "recusado" }); } });
 
 function enviarMensagem() { const texto = input.value.trim(); if (!texto) return; push(ref(db, "mensagens"), { nick: nickname, uid: uid, tipo: "texto", conteudo: texto, hora: Date.now() }); input.value = ""; } enviarBtn.onclick = enviarMensagem; input.addEventListener("keydown", (e) => { if (e.key === "Enter") enviarMensagem(); });
 
-onChildAdded(ref(db, "mensagens"), (snap) => { const msg = snap.val(); if (msg.reservado && msg.reservado !== uid && msg.uid !== uid) return;
-
-const div = document.createElement("div"); const nickSpan = document.createElement("span"); nickSpan.textContent = @${msg.nick}: ; nickSpan.style.fontWeight = "bold"; nickSpan.style.color = msg.uid === uid ? "#00ffff" : "#ff00ff"; div.appendChild(nickSpan);
+onChildAdded(ref(db, "mensagens"), (snap) => { const msg = snap.val(); const div = document.createElement("div"); const nickSpan = document.createElement("span"); nickSpan.textContent = @${msg.nick}: ; nickSpan.style.fontWeight = "bold"; nickSpan.style.color = msg.uid === uid ? "#00ffff" : "#ff00ff"; div.appendChild(nickSpan);
 
 if (msg.tipo === "texto") { div.innerHTML += msg.conteudo; } else if (msg.tipo === "img") { const toggleBtn = document.createElement("button"); toggleBtn.textContent = "Ver imagem"; const img = document.createElement("img"); img.src = msg.conteudo; img.style.maxWidth = "100%"; img.style.display = "none"; toggleBtn.onclick = () => { img.style.display = img.style.display === "none" ? "block" : "none"; toggleBtn.textContent = img.style.display === "none" ? "Ver imagem" : "Ocultar"; }; div.appendChild(toggleBtn); div.appendChild(img); } else if (msg.tipo === "audio") { const audio = document.createElement("audio"); audio.src = msg.conteudo; audio.controls = true; div.appendChild(audio); }
 
