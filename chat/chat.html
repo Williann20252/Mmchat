@@ -29,7 +29,7 @@
     </div>
   </main>
 
-  <!-- MENU LATERAL DE USUÁRIOS -->
+  <!-- MENU DE USUÁRIOS ONLINE -->
   <aside id="usuariosOnline" class="usuarios-sidebar hidden">
     <div style="display: flex; justify-content: space-between; align-items: center;">
       <h3>Usuários Online</h3>
@@ -69,6 +69,23 @@
       <input type="checkbox" id="gradientToggle" />
       Gradiente Premium
     </label>
+
+    <h3>🔒 Privacidade</h3>
+    <label>
+      <input type="checkbox" id="permitirPV" checked />
+      Permitir receber mensagens privadas
+    </label>
+
+    <div style="margin-top: 10px;">
+      <input type="text" id="usuarioPV" placeholder="Usuário a autorizar" style="width: 100%; padding: 5px; margin-bottom: 5px;" />
+      <button id="autorizarPV" style="width: 48%;">➕ Autorizar</button>
+      <button id="revogarPV" style="width: 48%; float: right;">➖ Revogar</button>
+    </div>
+
+    <div id="usuariosAutorizados" style="margin-top: 10px; font-size: 0.85rem;">
+      <strong>Autorizados:</strong>
+      <ul id="listaAutorizados"></ul>
+    </div>
 
     <button id="resetStyle">Resetar Estilo</button>
   </div>
