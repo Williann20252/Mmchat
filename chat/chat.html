@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MMChat - Sala Geral</title>
+  <title>MMChat – Sala Geral</title>
   <link rel="stylesheet" href="chat.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
 </head>
@@ -17,15 +17,15 @@
     <section id="chat-mural" class="chat-mural"></section>
 
     <div class="chat-input-area">
-      <input type="text" id="mensagemInput" placeholder="Digite sua mensagem..." />
+      <input type="text" id="mensagemInput" placeholder="Digite sua mensagem…" />
       <button id="enviarBtn">Enviar</button>
     </div>
 
     <div class="chat-tools">
-      <button id="imgBtn" title="Enviar imagem">📷</button>
+      <button id="imgBtn"   title="Enviar imagem">📷</button>
       <button id="audioBtn" title="Gravar áudio">🎤</button>
       <button id="usuariosBtn" title="Usuários online">👥</button>
-      <button id="configBtn" title="Configurações">⚙️</button>
+      <button id="configBtn"   title="Configurações">⚙️</button>
     </div>
   </main>
 
@@ -40,17 +40,27 @@
 
   <!-- Painel de configurações -->
   <aside id="configPainel" class="config-sidebar">
-    <h3>⚙️ Configurações</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h3>⚙️ Configurações</h3>
+      <button id="fecharConfig" class="sidebar-close" title="Fechar painel">✖️</button>
+    </div>
+
     <label>Cor da fonte:
       <input type="color" id="corFonte" />
-    </label><br /><br />
+    </label>
+    <br /><br />
+
     <label>Cor do nick:
       <input type="color" id="corNick" />
-    </label><br /><br />
+    </label>
+    <br /><br />
+
     <label>
       <input type="checkbox" id="rolagemAuto" checked />
       Rolagem automática
-    </label><br /><br />
+    </label>
+    <br /><br />
+
     <label>
       <input type="checkbox" id="gradienteNick" />
       Gradiente no nick (Premium)
