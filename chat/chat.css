@@ -1,185 +1,36 @@
-/* chat.css atualizado com estilo moderno, mural branco e botões vibrantes */
+<!DOCTYPE html><html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MMChat - Sala Geral</title>
+  <link rel="stylesheet" href="chat.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="chat-header">
+    <h1>MMChat</h1>
+    <button id="logoutBtn">Sair</button>
+  </header>  <main class="chat-container">
+    <section id="chat-mural" class="chat-mural"></section><div class="chat-input-area">
+  <input type="text" id="mensagemInput" placeholder="Digite sua mensagem..." />
+  <button id="enviarBtn">Enviar</button>
+</div>
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+<div class="chat-tools">
+  <button id="imgBtn">📷</button>
+  <button id="audioBtn">🎤</button>
+  <button id="usuariosBtn">👥</button>
+  <button id="configBtn">⚙️</button>
+</div>
 
-body {
-  font-family: 'Inter', sans-serif;
-  background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-}
-
-/* Cabeçalho */
-.chat-header {
-  width: 100%;
-  padding: 1rem;
-  background: #112d4e;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #fff;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-.chat-header h1 {
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.chat-header button {
-  background: #f67280;
-  border: none;
-  padding: 0.5rem 1rem;
-  color: #fff;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-/* Container principal */
-.chat-container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 600px;
-  flex-grow: 1;
-  padding: 1rem;
-}
-
-/* Mural de mensagens */
-.chat-mural {
-  background: #ffffff;
-  color: #333;
-  flex-grow: 1;
-  padding: 1rem;
-  overflow-y: auto;
-  height: 60vh;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-  scroll-behavior: smooth;
-}
-
-.chat-mural img {
-  max-width: 100%;
-  margin-top: 0.5rem;
-  border-radius: 8px;
-}
-
-/* Entrada de mensagem */
-.chat-input-area {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.chat-input-area input {
-  flex-grow: 1;
-  padding: 0.75rem;
-  border-radius: 6px;
-  border: none;
-  font-size: 1rem;
-}
-
-.chat-input-area button {
-  padding: 0.75rem 1rem;
-  background-color: #4da8da;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.chat-input-area button:hover {
-  background-color: #3b8dbd;
-}
-
-/* Botões extras */
-.chat-tools {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0;
-}
-
-.chat-tools button {
-  background: #4da8da;
-  border: none;
-  padding: 0.6rem 0.8rem;
-  font-size: 1.2rem;
-  border-radius: 6px;
-  color: #fff;
-  cursor: pointer;
-}
-
-.chat-tools button:hover {
-  background: #3b8dbd;
-}
-
-/* Usuários online */
-.usuarios-sidebar {
-  position: fixed;
-  right: 0;
-  top: 60px;
-  background: rgba(17, 45, 78, 0.95);
-  width: 220px;
-  height: calc(100% - 60px);
-  color: #fff;
-  padding: 1rem;
-  display: none;
-  z-index: 100;
-  box-shadow: -4px 0 8px rgba(0,0,0,0.3);
-  overflow-y: auto;
-}
-
-.usuarios-sidebar h3 {
-  margin-top: 0;
-  font-size: 1.2rem;
-  border-bottom: 1px solid #fff3;
-  padding-bottom: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.usuarios-sidebar ul {
-  list-style: none;
-  padding: 0;
-}
-
-.usuarios-sidebar ul li {
-  margin-bottom: 0.5rem;
-  padding: 0.3rem 0.5rem;
-  background: #1b3b5f;
-  border-radius: 5px;
-}
-
-.usuarios-sidebar.show {
-  display: block;
-}
-
-/* Responsividade */
-@media (max-width: 600px) {
-  .chat-container {
-    padding: 0 1rem;
-  }
-
-  .usuarios-sidebar {
-    width: 100%;
-    height: 35vh;
-    top: auto;
-    bottom: 0;
-    border-left: none;
-    border-top: 2px solid #fff3;
-  }
-
-  .chat-tools {
-    justify-content: center;
-    gap: 1rem;
-  }
-}
+  </main>  <aside id="usuariosOnline" class="usuarios-sidebar hidden">
+    <h3>Usuários Online</h3>
+    <ul id="listaUsuarios"></ul>
+  </aside>  <aside id="configPainel" class="config-sidebar hidden">
+    <h3>Configurações</h3>
+    <label>Cor da fonte: <input type="color" id="corFonte" /></label><br/><br/>
+    <label>Cor do nick: <input type="color" id="corNick" /></label><br/><br/>
+    <label><input type="checkbox" id="rolagemAuto" /> Rolagem automática</label><br/><br/>
+    <label><input type="checkbox" id="gradienteNick" /> Gradiente no nick (Premium)</label>
+  </aside>  <script type="module" src="chat.js"></script></body>
+</html>
