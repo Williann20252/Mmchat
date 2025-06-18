@@ -1,45 +1,172 @@
-/* chat.css atualizado para integrar com Firebase e layout moderno */
+document.addEventListener("DOMContentLoaded", () => {
+  // 🔧 Firebase config
+  const firebaseConfig = {
+    apiKey: "SUA_API_KEY",
+    authDomain: "SEU_DOMINIO.firebaseapp.com",
+    databaseURL: "https://SEU_DOMINIO.firebaseio.com",
+    projectId: "SEU_PROJECT_ID",
+    storageBucket: "SEU_BUCKET.appspot.com",
+    messagingSenderId: "SEU_SENDER_ID",
+    appId: "SEU_APP_ID"
+  };
 
-{ margin: 0; padding: 0; box-sizing: border-box; }
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
+  // 🔐 Identificação
+  let nickname = localStorage.getItem("nickname") || "Anônimo";
+  let userType = localStorage.getItem("userType") || "anonimo";
+  let uid = localStorage.getItem("uid");
+  if (!uid) {
+    uid = "user_" + Math.random().toString(36).substring(2, 10);
+    localStorage.setItem("uid", uid);
+  }
 
-body { font-family: 'Inter', sans-serif; background: linear-gradient(to right, #0f2027, #203a43, #2c5364); color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+  // DOM
+  const mural = document.getElementById("chat-mural");
+  const input = document.getElementById("mensagemInput");
+  const enviarBtn = document.getElementById("enviarBtn");
+  const usuariosBtn = document.getElementById("usuariosBtn");
+  const listaUsuarios = document.getElementById("listaUsuarios");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const usuariosSidebar = document.getElementById("usuariosOnline");
+  const imgBtn = document.getElementById("imgBtn");
+  const audioBtn = document.getElementById("audioBtn");
 
-.chat-header { width: 100%; padding: 1rem; background: #112d4e; display: flex; justify-content: space-between; align-items: center; color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+  // ✅ Marcar como online
+  const userRef = db.ref("onlineUsers/" + uid);
+  userRef.set(nickname);
+  userRef.onDisconnect().remove();
 
-.chat-header h1 { font-size: 1.5rem; font-weight: 600; }
+  // 🔄 Lista de usuários
+  db.ref("onlineUsers").on("value", (snapshot) => {
+    listaUsuarios.innerHTML = "";
+    const data = snapshot.val() || {};
+    Object.values(data).forEach((name) => {
+      const li = document.createElement("li");
+      li.textContent = name;
+      listaUsuarios.appendChild(li);
+    });
+  });
 
-.chat-header button { background: #f67280; border: none; padding: 0.5rem 1rem; color: #fff; border-radius: 8px; cursor: pointer; font-weight: bold; }
+  // ▶️ Enviar mensagem
+  enviarBtn?.addEventListener("click", () => {
+    const texto = input.value.trim();
+    if (!texto) return;
+    db.ref("mensagens").push({
+      nick: nickname,
+      uid: uid,
+      tipo: "texto",
+      conteudo: texto,
+      hora: Date.now()
+    });
+    input.value = "";
+  });
 
-.chat-container { display: flex; flex-direction: column; width: 100%; max-width: 600px; flex-grow: 1; padding: 1rem; }
+  input?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") enviarBtn?.click();
+  });
 
-.chat-mural { background: #ffffff; color: #333; flex-grow: 1; padding: 1rem; overflow-y: auto; height: 60vh; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+  // ▶️ Receber mensagens
+  db.ref("mensagens").on("child_added", (snapshot) => {
+    const msg = snapshot.val();
+    const div = document.createElement("div");
 
-.chat-input-area { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    const nickSpan = document.createElement("span");
+    nickSpan.textContent = `@${msg.nick}: `;
+    nickSpan.style.fontWeight = "bold";
+    nickSpan.style.color = msg.uid === uid ? "#00ffff" : "#ff00ff";
 
-.chat-input-area input { flex-grow: 1; padding: 0.75rem; border-radius: 6px; border: none; font-size: 1rem; }
+    div.appendChild(nickSpan);
 
-.chat-input-area button { padding: 0.75rem 1rem; background-color: #4da8da; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    if (msg.tipo === "texto") {
+      div.innerHTML += msg.conteudo;
+    } else if (msg.tipo === "img") {
+      const img = document.createElement("img");
+      img.src = msg.conteudo;
+      img.style.maxWidth = "100%";
+      img.style.display = "none";
+      img.style.marginTop = "10px";
 
-.chat-input-area button:hover { background-color: #3b8dbd; }
+      const toggleBtn = document.createElement("button");
+      toggleBtn.textContent = "Ver imagem";
+      toggleBtn.style.marginLeft = "10px";
+      toggleBtn.onclick = () => {
+        img.style.display = img.style.display === "none" ? "block" : "none";
+        toggleBtn.textContent = img.style.display === "none" ? "Ver imagem" : "Ocultar";
+      };
 
-.chat-tools { display: flex; justify-content: space-between; padding: 0.5rem 0; }
+      div.appendChild(toggleBtn);
+      div.appendChild(img);
+    } else if (msg.tipo === "audio") {
+      const audio = document.createElement("audio");
+      audio.src = msg.conteudo;
+      audio.controls = true;
+      div.appendChild(audio);
+    }
 
-.chat-tools button { background: #4da8da; border: none; padding: 0.6rem 0.8rem; font-size: 1.2rem; border-radius: 6px; color: #fff; cursor: pointer; }
+    mural.appendChild(div);
+    mural.scrollTop = mural.scrollHeight;
+  });
 
-.chat-tools button:hover { background: #3b8dbd; }
+  // 📷 Imagem
+  imgBtn?.addEventListener("click", () => {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.onchange = () => {
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        db.ref("mensagens").push({
+          nick: nickname,
+          uid: uid,
+          tipo: "img",
+          conteudo: reader.result,
+          hora: Date.now()
+        });
+      };
+      reader.readAsDataURL(file);
+    };
+    fileInput.click();
+  });
 
-.usuarios-sidebar { position: fixed; right: 0; top: 60px; background: rgba(17, 45, 78, 0.95); width: 220px; height: calc(100% - 60px); color: #fff; padding: 1rem; display: none; z-index: 100; box-shadow: -4px 0 8px rgba(0,0,0,0.3); }
+  // 🎤 Áudio
+  audioBtn?.addEventListener("click", async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const recorder = new MediaRecorder(stream);
+    const chunks = [];
 
-.usuarios-sidebar h3 { margin-top: 0; font-size: 1.2rem; border-bottom: 1px solid #fff3; padding-bottom: 0.5rem; margin-bottom: 0.5rem; }
+    recorder.ondataavailable = (e) => chunks.push(e.data);
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type: "audio/webm" });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        db.ref("mensagens").push({
+          nick: nickname,
+          uid: uid,
+          tipo: "audio",
+          conteudo: reader.result,
+          hora: Date.now()
+        });
+      };
+      reader.readAsDataURL(blob);
+    };
 
-.usuarios-sidebar ul { list-style: none; padding: 0; }
+    recorder.start();
+    alert("🎙️ Gravando... será enviado automaticamente após 60 segundos.");
+    setTimeout(() => recorder.stop(), 60000);
+  });
 
-.usuarios-sidebar ul li { margin-bottom: 0.5rem; padding: 0.3rem 0.5rem; background: #1b3b5f; border-radius: 5px; }
+  // 👥 Alternar visualização de usuários
+  usuariosBtn?.addEventListener("click", () => {
+    usuariosSidebar?.classList.toggle("show");
+  });
 
-.usuarios-sidebar.show { display: block; }
-
-@media (max-width: 600px) { .chat-container { padding: 0 1rem; }
-
-.usuarios-sidebar { width: 100%; height: 35vh; top: auto; bottom: 0; border-left: none; border-top: 2px solid #fff3; } }
-
+  // 🚪 Sair
+  logoutBtn?.addEventListener("click", () => {
+    db.ref("onlineUsers/" + uid).remove();
+    localStorage.clear();
+    window.location.href = "index.html";
+  });
+});
