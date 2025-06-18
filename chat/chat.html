@@ -8,41 +8,46 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
+  <!-- Topo -->
   <header class="chat-header">
     <h1>MMChat</h1>
     <button id="logoutBtn">Sair</button>
   </header>
 
+  <!-- Corpo principal -->
   <main class="chat-container">
+    <!-- Mural de mensagens -->
     <section id="chat-mural" class="chat-mural"></section>
 
+    <!-- Área de digitação -->
     <div class="chat-input-area">
       <input type="text" id="mensagemInput" placeholder="Digite sua mensagem…" />
       <button id="enviarBtn">Enviar</button>
     </div>
 
+    <!-- Ferramentas -->
     <div class="chat-tools">
-      <button id="imgBtn"   title="Enviar imagem">📷</button>
+      <button id="imgBtn" title="Enviar imagem">📷</button>
       <button id="audioBtn" title="Gravar áudio">🎤</button>
       <button id="usuariosBtn" title="Usuários online">👥</button>
-      <button id="configBtn"   title="Configurações">⚙️</button>
+      <button id="configBtn" title="Configurações">⚙️</button>
     </div>
   </main>
 
   <!-- Painel de usuários online -->
   <aside id="usuariosOnline" class="usuarios-sidebar">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
+    <div class="sidebar-header">
       <h3>Usuários Online</h3>
-      <button id="fecharUsuarios" class="sidebar-close" title="Fechar painel">✖️</button>
+      <button id="fecharUsuarios" class="sidebar-close" title="Fechar">✖️</button>
     </div>
     <ul id="listaUsuarios"></ul>
   </aside>
 
   <!-- Painel de configurações -->
   <aside id="configPainel" class="config-sidebar">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
+    <div class="sidebar-header">
       <h3>⚙️ Configurações</h3>
-      <button id="fecharConfig" class="sidebar-close" title="Fechar painel">✖️</button>
+      <button id="fecharConfig" class="sidebar-close" title="Fechar">✖️</button>
     </div>
 
     <label>Cor da fonte:
@@ -67,6 +72,7 @@
     </label>
   </aside>
 
+  <!-- Script principal -->
   <script type="module" src="chat_corrigido.js"></script>
 </body>
 </html>
