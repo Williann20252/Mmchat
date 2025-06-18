@@ -33,17 +33,14 @@
   <aside id="usuariosOnline" class="usuarios-sidebar">
     <div style="display: flex; justify-content: space-between; align-items: center;">
       <h3>Usuários Online</h3>
-      <button id="fecharUsuarios" class="sidebar-close">✖️</button>
+      <button id="fecharUsuarios" class="sidebar-close" title="Fechar">✖️</button>
     </div>
     <ul id="listaUsuarios"></ul>
   </aside>
 
   <!-- Painel de configurações -->
   <aside id="configPainel" class="config-sidebar">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <h3>⚙️ Configurações</h3>
-      <button class="sidebar-close" onclick="document.getElementById('configPainel').classList.remove('show')">✖️</button>
-    </div>
+    <h3>⚙️ Configurações</h3>
 
     <label>Cor da fonte:
       <input type="color" id="corFonte" />
@@ -64,6 +61,7 @@
     </label>
   </aside>
 
-  <script type="module" src="chat.js"></script>
+  <!-- Script principal -->
+  <script src="chat.js"></script>
 </body>
 </html>
