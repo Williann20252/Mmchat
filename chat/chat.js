@@ -1,36 +1,187 @@
-// chat.js completo com janelas flutuantes e Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getDatabase,
+  ref,
+  set,
+  push,
+  onChildAdded,
+  onValue,
+  remove
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"; import { getDatabase, ref, set, push, onChildAdded, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+// Configuração Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
+  authDomain: "mmchat-f4f88.firebaseapp.com",
+  databaseURL: "https://mmchat-f4f88-default-rtdb.firebaseio.com",
+  projectId: "mmchat-f4f88",
+  storageBucket: "mmchat-f4f88.appspot.com",
+  messagingSenderId: "404598754438",
+  appId: "1:404598754438:web:6a0892895591430d851507"
+};
 
-const firebaseConfig = { apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg", authDomain: "mmchat-f4f88.firebaseapp.com", databaseURL: "https://mmchat-f4f88-default-rtdb.firebaseio.com", projectId: "mmchat-f4f88", storageBucket: "mmchat-f4f88.appspot.com", messagingSenderId: "404598754438", appId: "1:404598754438:web:6a0892895591430d851507" };
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+// Identificação do usuário
+const nickname = localStorage.getItem("nickname") || "Anônimo";
+let uid = localStorage.getItem("uid");
+if (!uid) {
+  uid = "user_" + Math.random().toString(36).substring(2, 10);
+  localStorage.setItem("uid", uid);
+}
 
-// Identificação do usuário let nickname = localStorage.getItem("nickname") || "Anônimo"; let uid = localStorage.getItem("uid"); if (!uid) { uid = "user_" + Math.random().toString(36).substring(2, 10); localStorage.setItem("uid", uid); }
+// Referências DOM
+const mural = document.getElementById("chat-mural");
+const input = document.getElementById("mensagemInput");
+const enviarBtn = document.getElementById("enviarBtn");
+const usuariosBtn = document.getElementById("usuariosBtn");
+const configBtn = document.getElementById("configBtn");
+const listaUsuarios = document.getElementById("listaUsuarios");
+const logoutBtn = document.getElementById("logoutBtn");
+const imgBtn = document.getElementById("imgBtn");
+const audioBtn = document.getElementById("audioBtn");
+const painelUsuarios = document.getElementById("usuariosOnline");
+const painelConfig = document.getElementById("configPainel");
+const fecharUsuarios = document.getElementById("fecharUsuarios");
 
-// DOM Elements const mural = document.getElementById("chat-mural"); const input = document.getElementById("mensagemInput"); const enviarBtn = document.getElementById("enviarBtn"); const imgBtn = document.getElementById("imgBtn"); const audioBtn = document.getElementById("audioBtn"); const usuariosBtn = document.getElementById("usuariosBtn"); const configBtn = document.getElementById("configBtn"); const logoutBtn = document.getElementById("logoutBtn"); const listaUsuarios = document.getElementById("listaUsuarios"); const configPainel = document.getElementById("configPainel"); const usuariosOnline = document.getElementById("usuariosOnline"); const fecharUsuarios = document.getElementById("fecharUsuarios");
+// Online
+const userRef = ref(db, "onlineUsers/" + uid);
+set(userRef, nickname);
+window.addEventListener("beforeunload", () => remove(userRef));
 
-// Painel Configurações const corFonte = document.getElementById("corFonte"); const corNick = document.getElementById("corNick"); const rolagemAuto = document.getElementById("rolagemAuto"); const gradienteNick = document.getElementById("gradienteNick");
+// Atualizar usuários online
+onValue(ref(db, "onlineUsers"), (snapshot) => {
+  listaUsuarios.innerHTML = "";
+  const data = snapshot.val() || {};
+  Object.values(data).forEach((name) => {
+    const li = document.createElement("li");
+    li.textContent = name;
+    listaUsuarios.appendChild(li);
+  });
+});
 
-// Marcar online const userRef = ref(db, "onlineUsers/" + uid); set(userRef, nickname); window.addEventListener("beforeunload", () => remove(userRef));
+// Enviar mensagem
+function enviarMensagem() {
+  const texto = input.value.trim();
+  if (!texto) return;
+  push(ref(db, "mensagens"), {
+    nick: nickname,
+    uid: uid,
+    tipo: "texto",
+    conteudo: texto,
+    hora: Date.now()
+  });
+  input.value = "";
+}
+enviarBtn.onclick = enviarMensagem;
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") enviarMensagem();
+});
 
-// Atualizar lista de usuários online onValue(ref(db, "onlineUsers"), (snap) => { listaUsuarios.innerHTML = ""; const data = snap.val() || {}; Object.entries(data).forEach(([id, nome]) => { const li = document.createElement("li"); li.textContent = nome; listaUsuarios.appendChild(li); }); });
+// Exibir mensagens
+onChildAdded(ref(db, "mensagens"), (snap) => {
+  const msg = snap.val();
+  const div = document.createElement("div");
+  const nickSpan = document.createElement("span");
+  nickSpan.textContent = `@${msg.nick}: `;
+  nickSpan.style.fontWeight = "bold";
+  nickSpan.style.color = msg.uid === uid ? "#00ffff" : "#ff00ff";
+  div.appendChild(nickSpan);
 
-// Funções básicas function enviarMensagem() { const texto = input.value.trim(); if (!texto) return; push(ref(db, "mensagens"), { nick: nickname, uid: uid, tipo: "texto", conteudo: texto, hora: Date.now() }); input.value = ""; } enviarBtn.onclick = enviarMensagem; input.addEventListener("keydown", (e) => { if (e.key === "Enter") enviarMensagem(); });
+  if (msg.tipo === "texto") {
+    div.innerHTML += msg.conteudo;
+  } else if (msg.tipo === "img") {
+    const toggleBtn = document.createElement("button");
+    toggleBtn.textContent = "Ver imagem";
+    const img = document.createElement("img");
+    img.src = msg.conteudo;
+    img.style.maxWidth = "100%";
+    img.style.display = "none";
+    toggleBtn.onclick = () => {
+      img.style.display = img.style.display === "none" ? "block" : "none";
+      toggleBtn.textContent = img.style.display === "none" ? "Ver imagem" : "Ocultar";
+    };
+    div.appendChild(toggleBtn);
+    div.appendChild(img);
+  } else if (msg.tipo === "audio") {
+    const audio = document.createElement("audio");
+    audio.src = msg.conteudo;
+    audio.controls = true;
+    div.appendChild(audio);
+  }
 
-// Receber mensagens onChildAdded(ref(db, "mensagens"), (snap) => { const msg = snap.val(); const div = document.createElement("div"); const span = document.createElement("span"); span.textContent = @${msg.nick}: ; span.style.fontWeight = "bold"; span.style.color = msg.uid === uid ? "#00ffff" : "#ff00ff"; if (gradienteNick.checked) span.style.background = "linear-gradient(to right, #30cfd0, #330867)"; if (corNick.value) span.style.color = corNick.value;
+  mural.appendChild(div);
+  if (document.getElementById("rolagemAuto")?.checked ?? true) {
+    mural.scrollTop = mural.scrollHeight;
+  }
+});
 
-div.appendChild(span); div.style.color = corFonte.value || "#333";
+// Enviar imagem
+imgBtn.onclick = () => {
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.accept = "image/*";
+  fileInput.onchange = () => {
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      push(ref(db, "mensagens"), {
+        nick: nickname,
+        uid: uid,
+        tipo: "img",
+        conteudo: reader.result,
+        hora: Date.now()
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+  fileInput.click();
+};
 
-if (msg.tipo === "texto") { div.innerHTML += msg.conteudo; } else if (msg.tipo === "img") { const btn = document.createElement("button"); btn.textContent = "Ver imagem"; const img = document.createElement("img"); img.src = msg.conteudo; img.style.maxWidth = "100%"; img.style.display = "none"; btn.onclick = () => { img.style.display = img.style.display === "none" ? "block" : "none"; btn.textContent = img.style.display === "none" ? "Ver imagem" : "Ocultar imagem"; }; div.appendChild(btn); div.appendChild(img); } else if (msg.tipo === "audio") { const audio = document.createElement("audio"); audio.src = msg.conteudo; audio.controls = true; div.appendChild(audio); }
+// Gravar áudio
+audioBtn.onclick = async () => {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  const recorder = new MediaRecorder(stream);
+  const chunks = [];
 
-mural.appendChild(div); if (rolagemAuto.checked) mural.scrollTop = mural.scrollHeight; });
+  recorder.ondataavailable = (e) => chunks.push(e.data);
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: "audio/webm" });
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      push(ref(db, "mensagens"), {
+        nick: nickname,
+        uid: uid,
+        tipo: "audio",
+        conteudo: reader.result,
+        hora: Date.now()
+      });
+    };
+    reader.readAsDataURL(blob);
+  };
 
-// Enviar imagem imgBtn.onclick = () => { const inputImg = document.createElement("input"); inputImg.type = "file"; inputImg.accept = "image/*"; inputImg.onchange = () => { const file = inputImg.files[0]; const reader = new FileReader(); reader.onload = () => { push(ref(db, "mensagens"), { nick: nickname, uid: uid, tipo: "img", conteudo: reader.result, hora: Date.now() }); }; reader.readAsDataURL(file); }; inputImg.click(); };
+  recorder.start();
+  setTimeout(() => recorder.stop(), 60000);
+  alert("Gravando... será enviado automaticamente após 60s.");
+};
 
-// Enviar áudio audioBtn.onclick = async () => { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); const recorder = new MediaRecorder(stream); const chunks = []; recorder.ondataavailable = (e) => chunks.push(e.data); recorder.onstop = () => { const blob = new Blob(chunks, { type: "audio/webm" }); const reader = new FileReader(); reader.onloadend = () => { push(ref(db, "mensagens"), { nick: nickname, uid: uid, tipo: "audio", conteudo: reader.result, hora: Date.now() }); }; reader.readAsDataURL(blob); }; recorder.start(); setTimeout(() => recorder.stop(), 60000); alert("Gravando... será enviado após 60s"); };
+// Painéis flutuantes
+usuariosBtn.onclick = () => {
+  painelUsuarios.classList.toggle("show");
+};
 
-// Abrir e fechar painéis usuariosBtn.onclick = () => usuariosOnline.classList.toggle("show"); configBtn.onclick = () => configPainel.classList.toggle("show"); fecharUsuarios.onclick = () => usuariosOnline.classList.remove("show");
+fecharUsuarios.onclick = () => {
+  painelUsuarios.classList.remove("show");
+};
 
-// Logout logoutBtn.onclick = () => { remove(userRef); localStorage.clear(); location.href = "index.html"; };
+configBtn.onclick = () => {
+  painelConfig.classList.toggle("show");
+};
 
+// Logout
+logoutBtn.onclick = () => {
+  remove(userRef);
+  localStorage.clear();
+  window.location.href = "../index.html";
+};
