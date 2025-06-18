@@ -1,95 +1,31 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!DOCTYPE html><html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MMChat - Sala Geral</title>
   <link rel="stylesheet" href="chat.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 <body>
   <header class="chat-header">
     <h1>MMChat</h1>
     <button id="logoutBtn">Sair</button>
-  </header>
+  </header>  <main class="chat-container">
+    <section id="chat-mural" class="chat-mural"></section><div class="chat-input-area">
+  <input type="text" id="mensagemInput" placeholder="Digite sua mensagem..." />
+  <button id="enviarBtn">Enviar</button>
+</div>
 
-  <main class="chat-container">
-    <section id="chat-mural" class="chat-mural"></section>
+<div class="chat-tools">
+  <button id="imgBtn">📷</button>
+  <button id="audioBtn">🎤</button>
+  <button id="usuariosBtn">👥</button>
+</div>
 
-    <div class="chat-input-area">
-      <input type="text" id="mensagemInput" placeholder="Digite sua mensagem..." />
-      <button id="enviarBtn">Enviar</button>
-    </div>
-
-    <div class="chat-tools">
-      <button id="imgBtn">📷</button>
-      <button id="audioBtn">🎤</button>
-      <button id="usuariosBtn">👥</button>
-      <button id="configBtn">⚙️</button>
-    </div>
-  </main>
-
-  <!-- MENU DE USUÁRIOS ONLINE -->
-  <aside id="usuariosOnline" class="usuarios-sidebar hidden">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <h3>Usuários Online</h3>
-      <div>
-        <button id="minimizarUsuarios" style="background: transparent; color: white; border: none; font-size: 1.2rem; cursor: pointer;">➖</button>
-        <button id="fecharUsuarios" style="background: transparent; color: white; border: none; font-size: 1.2rem; cursor: pointer;">❌</button>
-      </div>
-    </div>
+  </main>  <aside id="usuariosOnline" class="usuarios-sidebar">
+    <h3>Usuários Online</h3>
     <ul id="listaUsuarios"></ul>
-  </aside>
-
-  <!-- MENU DE CONFIGURAÇÕES -->
-  <div id="configuracoesUsuario" class="config-menu hidden">
-    <h3>🎨 Personalização</h3>
-    <label>
-      Cor do Nick: <input type="color" id="nickColor" />
-    </label>
-    <label>
-      Cor da Fonte: <input type="color" id="fontColor" />
-    </label>
-    <label>
-      Fonte:
-      <select id="fonteSelect">
-        <option value="Inter">Inter</option>
-        <option value="Arial">Arial</option>
-        <option value="Verdana">Verdana</option>
-        <option value="Courier New">Courier New</option>
-      </select>
-    </label>
-
-    <h3>⚙️ Preferências</h3>
-    <label>
-      <input type="checkbox" id="scrollToggle" checked />
-      Rolagem Automática
-    </label>
-    <label>
-      <input type="checkbox" id="gradientToggle" />
-      Gradiente Premium
-    </label>
-
-    <h3>🔒 Privacidade</h3>
-    <label>
-      <input type="checkbox" id="permitirPV" checked />
-      Permitir receber mensagens privadas
-    </label>
-
-    <div style="margin-top: 10px;">
-      <input type="text" id="usuarioPV" placeholder="Usuário a autorizar" style="width: 100%; padding: 5px; margin-bottom: 5px;" />
-      <button id="autorizarPV" style="width: 48%;">➕ Autorizar</button>
-      <button id="revogarPV" style="width: 48%; float: right;">➖ Revogar</button>
-    </div>
-
-    <div id="usuariosAutorizados" style="margin-top: 10px; font-size: 0.85rem;">
-      <strong>Autorizados:</strong>
-      <ul id="listaAutorizados"></ul>
-    </div>
-
-    <button id="resetStyle">Resetar Estilo</button>
-  </div>
-
-  <script src="chat.js"></script>
-</body>
+  </aside>  <script src="chat.js"></script></body>
 </html>
