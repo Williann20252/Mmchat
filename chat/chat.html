@@ -5,6 +5,44 @@
   <title>MMChat - Sala Geral</title>
   <link rel="stylesheet" href="chat.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    .menu-container {
+      position: relative;
+      display: inline-block;
+    }.menu-btn {
+  background: #4da8da;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.menu-suspenso {
+  position: absolute;
+  right: 0;
+  background: rgba(0, 0, 0, 0.95);
+  border: 1px solid #4da8da;
+  padding: 1rem;
+  width: 250px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  z-index: 999;
+}
+
+.menu-suspenso.hidden {
+  display: none;
+}
+
+.menu-suspenso label {
+  color: white;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+  </style>
 </head>
 <body>
   <header class="chat-header">
@@ -20,31 +58,33 @@
   <button id="imgBtn" title="Enviar imagem">📷</button>
   <button id="audioBtn" title="Gravar áudio">🎤</button>
   <button id="usuariosBtn" title="Ver usuários online">👥</button>
-  <button id="configBtn" title="Configurações">⚙️</button>
+
+  <div class="menu-container">
+    <button id="abrirMenuConfig" class="menu-btn" title="Configurações">⚙️</button>
+    <div id="menuSuspenso" class="menu-suspenso hidden">
+      <label>Cor da fonte: <input type="color" id="corFonte" /></label>
+      <label>Cor do nick: <input type="color" id="corNick" /></label>
+      <label><input type="checkbox" id="rolagemAuto" checked /> Rolagem automática</label>
+      <label><input type="checkbox" id="gradienteNick" /> Gradiente no nick</label>
+    </div>
+  </div>
 </div>
 
   </main>  <aside id="usuariosOnline" class="usuarios-sidebar">
     <h3>Usuários Online</h3>
     <ul id="listaUsuarios"></ul>
-  </aside>  <aside id="configPainel" class="config-sidebar">
-    <h3>⚙️ Configurações</h3>
-    <button id="fecharConfig" style="margin-bottom: 1rem;">Minimizar</button><label>Cor da fonte:
-  <input type="color" id="corFonte" />
-</label><br /><br />
+  </aside>  <script type="module" src="chat.js"></script>  <script>
+    const abrirMenuConfig = document.getElementById("abrirMenuConfig");
+    const menuSuspenso = document.getElementById("menuSuspenso");
 
-<label>Cor do nick:
-  <input type="color" id="corNick" />
-</label><br /><br />
+    abrirMenuConfig.addEventListener("click", () => {
+      menuSuspenso.classList.toggle("hidden");
+    });
 
-<label>
-  <input type="checkbox" id="rolagemAuto" checked />
-  Rolagem automática
-</label><br /><br />
-
-<label>
-  <input type="checkbox" id="gradienteNick" />
-  Gradiente no nick (Premium)
-</label>
-
-  </aside>  <script type="module" src="chat.js"></script></body>
+    document.addEventListener("click", (e) => {
+      if (!abrirMenuConfig.contains(e.target) && !menuSuspenso.contains(e.target)) {
+        menuSuspenso.classList.add("hidden");
+      }
+    });
+  </script></body>
 </html>
