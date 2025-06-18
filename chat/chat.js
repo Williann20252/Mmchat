@@ -8,7 +8,7 @@ const app = initializeApp(firebaseConfig); const db = getDatabase(app);
 
 const nickname = localStorage.getItem("nickname") || "Anônimo"; const userType = localStorage.getItem("userType") || "anonimo"; let uid = localStorage.getItem("uid"); if (!uid) { uid = "user_" + Math.random().toString(36).substring(2, 10); localStorage.setItem("uid", uid); }
 
-const mural = document.getElementById("chat-mural"); const input = document.getElementById("mensagemInput"); const enviarBtn = document.getElementById("enviarBtn"); const usuariosBtn = document.getElementById("usuariosBtn"); const configBtn = document.getElementById("configBtn"); const configPainel = document.getElementById("configPainel"); const listaUsuarios = document.getElementById("listaUsuarios"); const logoutBtn = document.getElementById("logoutBtn");
+const mural = document.getElementById("chat-mural"); const input = document.getElementById("mensagemInput"); const enviarBtn = document.getElementById("enviarBtn"); const usuariosBtn = document.getElementById("usuariosBtn"); const configBtn = document.getElementById("configBtn"); const configPainel = document.getElementById("configPainel"); const listaUsuarios = document.getElementById("listaUsuarios"); const logoutBtn = document.getElementById("logoutBtn"); const imgBtn = document.getElementById("imgBtn"); const audioBtn = document.getElementById("audioBtn");
 
 // Online status const userRef = ref(db, "onlineUsers/" + uid); set(userRef, nickname); window.addEventListener("beforeunload", () => remove(userRef));
 
