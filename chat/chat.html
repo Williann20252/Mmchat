@@ -29,7 +29,7 @@
     </div>
   </main>
 
-  <!-- PAINEL DE USUÁRIOS ONLINE -->
+  <!-- MENU LATERAL DE USUÁRIOS -->
   <aside id="usuariosOnline" class="usuarios-sidebar hidden">
     <div style="display: flex; justify-content: space-between; align-items: center;">
       <h3>Usuários Online</h3>
@@ -41,8 +41,9 @@
     <ul id="listaUsuarios"></ul>
   </aside>
 
-  <!-- MENU DE CONFIGURAÇÃO -->
+  <!-- MENU DE CONFIGURAÇÕES -->
   <div id="configuracoesUsuario" class="config-menu hidden">
+    <h3>🎨 Personalização</h3>
     <label>
       Cor do Nick: <input type="color" id="nickColor" />
     </label>
@@ -58,14 +59,17 @@
         <option value="Courier New">Courier New</option>
       </select>
     </label>
+
+    <h3>⚙️ Preferências</h3>
     <label>
-      Rolagem Automática:
       <input type="checkbox" id="scrollToggle" checked />
+      Rolagem Automática
     </label>
     <label>
-      Gradiente Premium:
       <input type="checkbox" id="gradientToggle" />
+      Gradiente Premium
     </label>
+
     <button id="resetStyle">Resetar Estilo</button>
   </div>
 
