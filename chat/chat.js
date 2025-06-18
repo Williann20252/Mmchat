@@ -1,6 +1,13 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getDatabase, ref, set, push, onChildAdded, onValue, remove
+  getDatabase,
+  ref,
+  set,
+  push,
+  onChildAdded,
+  onValue,
+  remove,
+  update
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
@@ -16,14 +23,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const nickname = localStorage.getItem("nickname") || "Anônimo";
-const userType = localStorage.getItem("userType") || "anonimo";
+// Identificação do usuário
+let nickname = localStorage.getItem("nickname") || "Anônimo";
+let userType = localStorage.getItem("userType") || "anonimo";
 let uid = localStorage.getItem("uid");
 if (!uid) {
   uid = "user_" + Math.random().toString(36).substring(2, 10);
   localStorage.setItem("uid", uid);
 }
 
+// Elementos DOM
 const mural = document.getElementById("chat-mural");
 const input = document.getElementById("mensagemInput");
 const enviarBtn = document.getElementById("enviarBtn");
@@ -35,12 +44,25 @@ const logoutBtn = document.getElementById("logoutBtn");
 const imgBtn = document.getElementById("imgBtn");
 const audioBtn = document.getElementById("audioBtn");
 
-// ✅ Marcar usuário online
+// 🔧 Novo botão de minimizar painel
+const minimizarBtn = document.createElement("button");
+minimizarBtn.textContent = "Minimizar";
+minimizarBtn.style.marginTop = "10px";
+minimizarBtn.style.background = "#f67280";
+minimizarBtn.style.color = "#fff";
+minimizarBtn.style.border = "none";
+minimizarBtn.style.padding = "5px 10px";
+minimizarBtn.style.borderRadius = "6px";
+minimizarBtn.style.cursor = "pointer";
+minimizarBtn.onclick = () => configPainel.classList.remove("show");
+configPainel.appendChild(minimizarBtn);
+
+// ✅ Marcar como online
 const userRef = ref(db, "onlineUsers/" + uid);
 set(userRef, nickname);
 window.addEventListener("beforeunload", () => remove(userRef));
 
-// ✅ Lista de usuários online
+// 🟢 Lista de usuários online
 onValue(ref(db, "onlineUsers"), (snapshot) => {
   listaUsuarios.innerHTML = "";
   const data = snapshot.val() || {};
@@ -52,7 +74,7 @@ onValue(ref(db, "onlineUsers"), (snapshot) => {
   });
 });
 
-// ✅ Solicitação de mensagem privada
+// 📩 Solicitação de mensagem privada
 function solicitarPV(destUid, destNick) {
   push(ref(db, "pvSolicitacoes"), {
     deUid: uid,
@@ -63,29 +85,25 @@ function solicitarPV(destUid, destNick) {
   });
 }
 
-// ✅ Escutar solicitações
 onChildAdded(ref(db, "pvSolicitacoes"), (snap) => {
   const s = snap.val();
   if (s.paraUid === uid && s.status === "pendente") {
     const div = document.createElement("div");
-    div.innerHTML = `
-      <strong>@${s.deNick}</strong> deseja enviar mensagem reservada.
+    div.innerHTML = `<strong>@${s.deNick}</strong> deseja enviar mensagem reservada.
       <button onclick="aceitarPV('${snap.key}')">Aceitar</button>
-      <button onclick="recusarPV('${snap.key}')">Recusar</button>
-    `;
+      <button onclick="recusarPV('${snap.key}')">Recusar</button>`;
     mural.appendChild(div);
   }
 });
 
 window.aceitarPV = (key) => {
-  set(ref(db, `pvSolicitacoes/${key}/status`), "aceito");
+  update(ref(db, `pvSolicitacoes/${key}`), { status: "aceito" });
 };
-
 window.recusarPV = (key) => {
-  set(ref(db, `pvSolicitacoes/${key}/status`), "recusado");
+  update(ref(db, `pvSolicitacoes/${key}`), { status: "recusado" });
 };
 
-// ✅ Enviar mensagem pública
+// ✉️ Enviar mensagem
 function enviarMensagem() {
   const texto = input.value.trim();
   if (!texto) return;
@@ -98,13 +116,12 @@ function enviarMensagem() {
   });
   input.value = "";
 }
-
 enviarBtn.onclick = enviarMensagem;
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") enviarMensagem();
 });
 
-// ✅ Mostrar mensagens
+// 👁️ Mostrar mensagens
 onChildAdded(ref(db, "mensagens"), (snapshot) => {
   const msg = snapshot.val();
   const div = document.createElement("div");
@@ -137,10 +154,12 @@ onChildAdded(ref(db, "mensagens"), (snapshot) => {
   }
 
   mural.appendChild(div);
-  mural.scrollTop = mural.scrollHeight;
+  if (document.getElementById("rolagemAuto")?.checked ?? true) {
+    mural.scrollTop = mural.scrollHeight;
+  }
 });
 
-// ✅ Enviar imagem
+// 📷 Imagem
 imgBtn.onclick = () => {
   const fileInput = document.createElement("input");
   fileInput.type = "file";
@@ -162,7 +181,7 @@ imgBtn.onclick = () => {
   fileInput.click();
 };
 
-// ✅ Gravar áudio até 60 segundos
+// 🎤 Áudio
 audioBtn.onclick = async () => {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   const recorder = new MediaRecorder(stream);
@@ -187,7 +206,7 @@ audioBtn.onclick = async () => {
   alert("Gravando... será enviado automaticamente após 60s.");
 };
 
-// ✅ Alternar painéis
+// Alternar visibilidade dos painéis
 usuariosBtn.onclick = () => {
   document.getElementById("usuariosOnline").classList.toggle("show");
 };
@@ -195,7 +214,7 @@ configBtn.onclick = () => {
   configPainel.classList.toggle("show");
 };
 
-// ✅ Logout
+// Sair
 logoutBtn.onclick = () => {
   remove(userRef);
   localStorage.clear();
