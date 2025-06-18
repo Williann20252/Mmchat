@@ -5,8 +5,6 @@
   <title>MMChat - Sala Geral</title>
   <link rel="stylesheet" href="chat.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 <body>
   <header class="chat-header">
@@ -22,10 +20,17 @@
   <button id="imgBtn">📷</button>
   <button id="audioBtn">🎤</button>
   <button id="usuariosBtn">👥</button>
+  <button id="configBtn">⚙️</button>
 </div>
 
-  </main>  <aside id="usuariosOnline" class="usuarios-sidebar">
+  </main>  <aside id="usuariosOnline" class="usuarios-sidebar hidden">
     <h3>Usuários Online</h3>
     <ul id="listaUsuarios"></ul>
-  </aside>  <script src="chat.js"></script></body>
+  </aside>  <aside id="configPainel" class="config-sidebar hidden">
+    <h3>Configurações</h3>
+    <label>Cor da fonte: <input type="color" id="corFonte" /></label><br/><br/>
+    <label>Cor do nick: <input type="color" id="corNick" /></label><br/><br/>
+    <label><input type="checkbox" id="rolagemAuto" /> Rolagem automática</label><br/><br/>
+    <label><input type="checkbox" id="gradienteNick" /> Gradiente no nick (Premium)</label>
+  </aside>  <script type="module" src="chat.js"></script></body>
 </html>
