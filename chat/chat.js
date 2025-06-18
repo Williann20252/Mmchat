@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const configBtn = document.getElementById("configBtn");
   const configMenu = document.getElementById("configuracoesUsuario");
   const fecharUsuarios = document.getElementById("fecharUsuarios");
+  const minimizarUsuarios = document.getElementById("minimizarUsuarios");
 
   const nickname = localStorage.getItem("nickname") || "Anônimo";
   const userType = localStorage.getItem("userType") || "anonimo";
@@ -37,6 +38,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   fecharUsuarios?.addEventListener("click", () => {
+    sidebar.classList.remove("show");
+  });
+
+  minimizarUsuarios?.addEventListener("click", () => {
     sidebar.classList.remove("show");
   });
 
@@ -121,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fileInput.click();
   });
 
-  // Criação da mensagem visual com cores separadas
+  // Criação da mensagem com estilo
   function criarMensagemVisual() {
     const div = document.createElement("div");
     div.style.marginBottom = "0.8rem";
@@ -200,7 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
     location.reload();
   });
 
-  // Inicializar campos com valores salvos
+  // Inicialização dos campos
   corNickInput && (corNickInput.value = nickColor);
   fontColorInput && (fontColorInput.value = fontColor);
   fonteSelect && (fonteSelect.value = font);
