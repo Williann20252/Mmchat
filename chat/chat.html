@@ -10,10 +10,7 @@
 <body>
   <header class="chat-header">
     <h1>MMChat</h1>
-    <div class="user-config">
-      <button id="configBtn">⚙️</button>
-      <button id="logoutBtn">Sair</button>
-    </div>
+    <button id="logoutBtn">Sair</button>
   </header>
 
   <main class="chat-container">
@@ -28,22 +25,49 @@
       <button id="imgBtn">📷</button>
       <button id="audioBtn">🎤</button>
       <button id="usuariosBtn">👥</button>
+      <button id="configBtn">⚙️</button>
     </div>
   </main>
 
+  <!-- PAINEL DE USUÁRIOS ONLINE -->
   <aside id="usuariosOnline" class="usuarios-sidebar hidden">
-    <h3>Usuários Online</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h3>Usuários Online</h3>
+      <div>
+        <button id="minimizarUsuarios" style="background: transparent; color: white; border: none; font-size: 1.2rem; cursor: pointer;">➖</button>
+        <button id="fecharUsuarios" style="background: transparent; color: white; border: none; font-size: 1.2rem; cursor: pointer;">❌</button>
+      </div>
+    </div>
     <ul id="listaUsuarios"></ul>
   </aside>
 
-  <section id="configuracoesUsuario" class="config-menu hidden">
-    <h3>Configurações</h3>
-    <label>Cor do Nick: <input type="color" id="nickColor" /></label><br/>
-    <label>Cor da Fonte: <input type="color" id="fontColor" /></label><br/>
-    <label><input type="checkbox" id="gradientToggle" /> Gradiente Premium</label><br/>
-    <label><input type="checkbox" id="scrollToggle" /> Rolagem Automática</label><br/>
-    <button id="resetStyle">Redefinir</button>
-  </section>
+  <!-- MENU DE CONFIGURAÇÃO -->
+  <div id="configuracoesUsuario" class="config-menu hidden">
+    <label>
+      Cor do Nick: <input type="color" id="nickColor" />
+    </label>
+    <label>
+      Cor da Fonte: <input type="color" id="fontColor" />
+    </label>
+    <label>
+      Fonte:
+      <select id="fonteSelect">
+        <option value="Inter">Inter</option>
+        <option value="Arial">Arial</option>
+        <option value="Verdana">Verdana</option>
+        <option value="Courier New">Courier New</option>
+      </select>
+    </label>
+    <label>
+      Rolagem Automática:
+      <input type="checkbox" id="scrollToggle" checked />
+    </label>
+    <label>
+      Gradiente Premium:
+      <input type="checkbox" id="gradientToggle" />
+    </label>
+    <button id="resetStyle">Resetar Estilo</button>
+  </div>
 
   <script src="chat.js"></script>
 </body>
