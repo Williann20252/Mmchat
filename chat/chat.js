@@ -77,12 +77,12 @@ document.addEventListener("DOMContentLoaded", () => {
             mediaRecorder.stop();
             audioBtn.textContent = "🎤";
           }
-        }, 60000); // até 60 segundos
+        }, 60000);
       });
     }
   });
 
-  // Envio de imagem com botão ver/ocultar
+  // Imagem com ver/ocultar
   imgBtn.addEventListener("click", () => {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
@@ -126,7 +126,6 @@ document.addEventListener("DOMContentLoaded", () => {
     fileInput.click();
   });
 
-  // Criação da mensagem com estilo
   function criarMensagemVisual() {
     const div = document.createElement("div");
     div.style.marginBottom = "0.8rem";
@@ -205,10 +204,53 @@ document.addEventListener("DOMContentLoaded", () => {
     location.reload();
   });
 
-  // Inicialização dos campos
-  corNickInput && (corNickInput.value = nickColor);
-  fontColorInput && (fontColorInput.value = fontColor);
-  fonteSelect && (fonteSelect.value = font);
-  scrollToggle && (scrollToggle.checked = autoScroll);
-  gradientToggle && (gradientToggle.checked = gradienteAtivo);
+  // PRIVACIDADE PV
+  const permitirPV = document.getElementById("permitirPV");
+  const usuarioPV = document.getElementById("usuarioPV");
+  const autorizarPV = document.getElementById("autorizarPV");
+  const revogarPV = document.getElementById("revogarPV");
+  const listaAutorizados = document.getElementById("listaAutorizados");
+
+  let aceitarPV = JSON.parse(localStorage.getItem("aceitarPV")) ?? true;
+  let autorizadosPV = JSON.parse(localStorage.getItem("autorizadosPV")) || [];
+
+  permitirPV.checked = aceitarPV;
+  atualizarListaPV();
+
+  permitirPV?.addEventListener("change", () => {
+    aceitarPV = permitirPV.checked;
+    localStorage.setItem("aceitarPV", aceitarPV);
+  });
+
+  autorizarPV?.addEventListener("click", () => {
+    const nome = usuarioPV.value.trim();
+    if (nome && !autorizadosPV.includes(nome)) {
+      autorizadosPV.push(nome);
+      localStorage.setItem("autorizadosPV", JSON.stringify(autorizadosPV));
+      usuarioPV.value = "";
+      atualizarListaPV();
+    }
+  });
+
+  revogarPV?.addEventListener("click", () => {
+    const nome = usuarioPV.value.trim();
+    autorizadosPV = autorizadosPV.filter(u => u !== nome);
+    localStorage.setItem("autorizadosPV", JSON.stringify(autorizadosPV));
+    usuarioPV.value = "";
+    atualizarListaPV();
+  });
+
+  function atualizarListaPV() {
+    if (!listaAutorizados) return;
+    listaAutorizados.innerHTML = "";
+    autorizadosPV.forEach(nick => {
+      const li = document.createElement("li");
+      li.textContent = nick;
+      listaAutorizados.appendChild(li);
+    });
+  }
+
+  function podeReceberPV(deQuem) {
+    return aceitarPV && autorizadosPV.includes(deQuem);
+  }
 });
