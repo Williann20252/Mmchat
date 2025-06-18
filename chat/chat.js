@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const audioBtn = document.getElementById("audioBtn");
   const configBtn = document.getElementById("configBtn");
   const configMenu = document.getElementById("configuracoesUsuario");
+  const fecharUsuarios = document.getElementById("fecharUsuarios");
 
   const nickname = localStorage.getItem("nickname") || "Anônimo";
   const userType = localStorage.getItem("userType") || "anonimo";
@@ -21,24 +22,24 @@ document.addEventListener("DOMContentLoaded", () => {
   let mediaRecorder;
   let audioChunks = [];
 
-  // Evento: enviar texto
   enviarBtn.addEventListener("click", enviarMensagem);
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") enviarMensagem();
   });
 
-  // Evento: logout
   logoutBtn.addEventListener("click", () => {
     localStorage.clear();
     window.location.href = "index.html";
   });
 
-  // Alternar painel de usuários
   usuariosBtn.addEventListener("click", () => {
     sidebar.classList.toggle("show");
   });
 
-  // Alternar painel de configurações
+  fecharUsuarios?.addEventListener("click", () => {
+    sidebar.classList.remove("show");
+  });
+
   configBtn?.addEventListener("click", () => {
     configMenu?.classList.toggle("hidden");
   });
@@ -76,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Imagem com botão ver/ocultar
+  // Envio de imagem com botão ver/ocultar
   imgBtn.addEventListener("click", () => {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
@@ -120,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fileInput.click();
   });
 
-  // Criar visual da mensagem com estilos
+  // Criação da mensagem visual com cores separadas
   function criarMensagemVisual() {
     const div = document.createElement("div");
     div.style.marginBottom = "0.8rem";
@@ -130,12 +131,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const nickSpan = document.createElement("span");
     nickSpan.textContent = `@${nickname}: `;
     nickSpan.style.fontWeight = "bold";
-    nickSpan.style.color = nickColor;
 
     if (userType === "premium" && gradienteAtivo) {
       nickSpan.style.backgroundImage = "linear-gradient(to right, #00ffff, #ff00ff)";
       nickSpan.style.webkitBackgroundClip = "text";
       nickSpan.style.color = "transparent";
+    } else {
+      nickSpan.style.color = nickColor;
     }
 
     div.appendChild(nickSpan);
@@ -146,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const msg = input.value.trim();
     if (!msg) return;
     const div = criarMensagemVisual();
-    div.textContent += msg;
+    div.innerHTML += msg;
     mural.appendChild(div);
     input.value = "";
     scrollar();
@@ -158,12 +160,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // CONFIGURAÇÕES DO USUÁRIO
+  // CONFIGURAÇÕES
   const corNickInput = document.getElementById("nickColor");
   const fontColorInput = document.getElementById("fontColor");
   const fonteSelect = document.getElementById("fonteSelect");
   const scrollToggle = document.getElementById("scrollToggle");
   const gradientToggle = document.getElementById("gradientToggle");
+  const resetStyle = document.getElementById("resetStyle");
 
   corNickInput?.addEventListener("input", () => {
     nickColor = corNickInput.value;
@@ -189,7 +192,6 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("gradiente", gradienteAtivo);
   });
 
-  const resetStyle = document.getElementById("resetStyle");
   resetStyle?.addEventListener("click", () => {
     localStorage.removeItem("nickColor");
     localStorage.removeItem("fontColor");
@@ -198,7 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
     location.reload();
   });
 
-  // Inicializa valores salvos
+  // Inicializar campos com valores salvos
   corNickInput && (corNickInput.value = nickColor);
   fontColorInput && (fontColorInput.value = fontColor);
   fonteSelect && (fonteSelect.value = font);
