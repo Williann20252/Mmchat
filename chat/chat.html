@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MMChat - Sala Geral</title>
   <link rel="stylesheet" href="chat.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
   <header class="chat-header">
@@ -24,22 +24,23 @@
     <div class="chat-tools">
       <button id="imgBtn" title="Enviar imagem">📷</button>
       <button id="audioBtn" title="Gravar áudio">🎤</button>
-      <button id="usuariosBtn" title="Ver usuários online">👥</button>
-      <button id="configBtn" title="Configurações">⚙️</button>
+      <button id="usuariosBtn" title="Usuários online">👥</button>
+      <button id="configBtn" title="Abrir configurações">⚙️</button>
     </div>
   </main>
 
+  <!-- Painel de usuários online -->
   <aside id="usuariosOnline" class="usuarios-sidebar">
     <div style="display: flex; justify-content: space-between; align-items: center;">
       <h3>Usuários Online</h3>
-      <button id="fecharUsuariosBtn" style="background: transparent; border: none; color: white; font-size: 1.2rem; cursor: pointer;">✖️</button>
+      <button id="fecharUsuarios" style="background: transparent; color: white; border: none; font-size: 1.2rem; cursor: pointer;">✖️</button>
     </div>
     <ul id="listaUsuarios"></ul>
   </aside>
 
+  <!-- Painel de configurações -->
   <aside id="configPainel" class="config-sidebar">
     <h3>⚙️ Configurações</h3>
-
     <label>Cor da fonte:
       <input type="color" id="corFonte" />
     </label><br /><br />
@@ -60,16 +61,5 @@
   </aside>
 
   <script type="module" src="chat.js"></script>
-  <script>
-    // Script simples para fechar o painel de usuários
-    document.addEventListener("DOMContentLoaded", () => {
-      const fecharBtn = document.getElementById("fecharUsuariosBtn");
-      const painelUsuarios = document.getElementById("usuariosOnline");
-
-      fecharBtn.addEventListener("click", () => {
-        painelUsuarios.classList.remove("show");
-      });
-    });
-  </script>
 </body>
 </html>
