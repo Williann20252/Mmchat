@@ -34,18 +34,19 @@ if (!uid) {
 }
 
 // Elementos DOM
-const mural = document.getElementById("chat-mural");
-const input = document.getElementById("mensagemInput");
-const enviarBtn = document.getElementById("enviarBtn");
-const usuariosBtn = document.getElementById("usuariosBtn");
-const configBtn = document.getElementById("configBtn");
-const listaUsuarios = document.getElementById("listaUsuarios");
-const logoutBtn = document.getElementById("logoutBtn");
-const imgBtn = document.getElementById("imgBtn");
-const audioBtn = document.getElementById("audioBtn");
+const mural          = document.getElementById("chat-mural");
+const input          = document.getElementById("mensagemInput");
+const enviarBtn      = document.getElementById("enviarBtn");
+const usuariosBtn    = document.getElementById("usuariosBtn");
+const configBtn      = document.getElementById("configBtn");
+const listaUsuarios  = document.getElementById("listaUsuarios");
+const logoutBtn      = document.getElementById("logoutBtn");
+const imgBtn         = document.getElementById("imgBtn");
+const audioBtn       = document.getElementById("audioBtn");
 const painelUsuarios = document.getElementById("usuariosOnline");
-const painelConfig = document.getElementById("configPainel");
+const painelConfig   = document.getElementById("configPainel");
 const fecharUsuarios = document.getElementById("fecharUsuarios");
+const fecharConfig   = document.getElementById("fecharConfig");  // <— NOVO
 
 // Marcar como online
 const userRef = ref(db, "onlineUsers/" + uid);
@@ -85,8 +86,8 @@ onChildAdded(ref(db, "pvSolicitacoes"), (snap) => {
     div.className = "msg-pv";
     div.innerHTML = `
       <strong>@${s.deNick}</strong> deseja conversar reservadamente.
-      <button class='aceitarPV' data-id='${snap.key}'>Aceitar</button>
-      <button class='recusarPV' data-id='${snap.key}'>Recusar</button>
+      <button class="aceitarPV" data-id="${snap.key}">Aceitar</button>
+      <button class="recusarPV" data-id="${snap.key}">Recusar</button>
     `;
     mural.appendChild(div);
   }
@@ -124,7 +125,6 @@ input.addEventListener("keydown", (e) => {
 // Exibir mensagens
 onChildAdded(ref(db, "mensagens"), (snap) => {
   const msg = snap.val();
-
   const div = document.createElement("div");
   const nickSpan = document.createElement("span");
   nickSpan.textContent = `@${msg.nick}: `;
@@ -166,7 +166,6 @@ imgBtn.onclick = () => {
   fileInput.type = "file";
   fileInput.accept = "image/*";
   fileInput.onchange = () => {
-    const file = fileInput.files[0];
     const reader = new FileReader();
     reader.onload = () => {
       push(ref(db, "mensagens"), {
@@ -177,7 +176,7 @@ imgBtn.onclick = () => {
         hora: Date.now()
       });
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(fileInput.files[0]);
   };
   fileInput.click();
 };
@@ -187,8 +186,7 @@ audioBtn.onclick = async () => {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   const recorder = new MediaRecorder(stream);
   const chunks = [];
-
-  recorder.ondataavailable = (e) => chunks.push(e.data);
+  recorder.ondataavailable = e => chunks.push(e.data);
   recorder.onstop = () => {
     const blob = new Blob(chunks, { type: "audio/webm" });
     const reader = new FileReader();
@@ -203,16 +201,16 @@ audioBtn.onclick = async () => {
     };
     reader.readAsDataURL(blob);
   };
-
   recorder.start();
   setTimeout(() => recorder.stop(), 60000);
-  alert("Gravando... será enviado automaticamente após 60s.");
+  alert("Gravando… será enviado automaticamente após 60s.");
 };
 
 // Botões visuais
-usuariosBtn.onclick = () => painelUsuarios.classList.toggle("show");
+usuariosBtn.onclick    = () => painelUsuarios.classList.toggle("show");
 fecharUsuarios.onclick = () => painelUsuarios.classList.remove("show");
-configBtn.onclick = () => painelConfig.classList.toggle("show");
+configBtn.onclick      = () => painelConfig.classList.toggle("show");
+fecharConfig.onclick   = () => painelConfig.classList.remove("show");
 
 // Logout
 logoutBtn.onclick = () => {
