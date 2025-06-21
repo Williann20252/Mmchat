@@ -18,7 +18,7 @@ const userRef = ref(db, "onlineUsers/" + uid); set(userRef, nickname); window.ad
 
 // Escutar solicitações de PV onChildAdded(ref(db, "pvSolicitacoes"), (snap) => { const s = snap.val(); if (s.paraUid === uid && s.status === "pendente") { const div = document.createElement("div"); div.className = "msg-pv"; div.innerHTML = <strong>@${s.deNick}</strong> deseja conversar reservadamente.  <button class='aceitarPV' data-id='${snap.key}'>Aceitar</button> <button class='recusarPV' data-id='${snap.key}'>Recusar</button>; mural.appendChild(div); } });
 
-document.addEventListener("click", (e) => { const key = e.target.dataset?.id; if (e.target.classList.contains("aceitarPV")) { update(ref(db, pvSolicitacoes/${key}), { status: "aceito" }); } if (e.target.classList.contains("recusarPV")) { update(ref(db, pvSolicitacoes/${key}), { status: "recusado" }); } });
+document.addEventListener("click", (e) => { const key = e.target.dataset?.id; if (e.target.classList.contains("aceitarPV")) { update(ref(db, `pvSolicitacoes/${key}`), { status: "aceito" }); } if (e.target.classList.contains("recusarPV")) { update(ref(db, `pvSolicitacoes/${key}`), { status: "recusado" }); } });
 
 function enviarMensagem() { const texto = input.value.trim(); if (!texto) return; push(ref(db, "mensagens"), { nick: nickname, uid: uid, tipo: "texto", conteudo: texto, hora: Date.now() }); input.value = ""; } enviarBtn.onclick = enviarMensagem; input.addEventListener("keydown", (e) => { if (e.key === "Enter") enviarMensagem(); });
 
