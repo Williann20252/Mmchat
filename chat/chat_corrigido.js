@@ -1,5 +1,5 @@
 
-alert("JS funcionando!"); // Teste visual
+ // Teste visual
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
@@ -27,6 +27,27 @@ if (!uid) {
 }
 
 const mural = document.getElementById("chat-mural");
+
+setTimeout(() => {
+  const div = document.createElement("div");
+  div.innerHTML = `
+    👋 Olá, ${nickname}!<br>
+    Este chat é mantido com a ajuda dos <strong>usuários Premium</strong> 💎.<br>
+    Considere apoiar o projeto para garantir que ele continue online. 🙌
+  `;
+  div.style.background = "linear-gradient(to right, #6a11cb, #2575fc)";
+  div.style.color = "#fff";
+  div.style.padding = "12px";
+  div.style.margin = "10px 0";
+  div.style.borderRadius = "12px";
+  div.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
+  div.style.fontSize = "0.95rem";
+  div.style.lineHeight = "1.4";
+  div.style.fontWeight = "500";
+  div.style.textAlign = "center";
+  mural.appendChild(div);
+}, 600);
+
 const input = document.getElementById("mensagemInput");
 const enviarBtn = document.getElementById("enviarBtn");
 const usuariosBtn = document.getElementById("usuariosBtn");
@@ -165,34 +186,69 @@ imgBtn.onclick = () => {
   fileInput.click();
 };
 
+
+let mediaRecorder;
+let audioChunks = [];
+
 audioBtn.onclick = async () => {
-  audioBtn.classList.add("pulsando"); // animação ativa
+  document.getElementById("audioModal").classList.add("show");
+};
 
+document.getElementById("gravarBtn").onclick = async () => {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  const recorder = new MediaRecorder(stream);
-  const chunks = [];
+  mediaRecorder = new MediaRecorder(stream);
+  audioChunks = [];
 
-  recorder.ondataavailable = (e) => chunks.push(e.data);
-  recorder.onstop = () => {
-    audioBtn.classList.remove("pulsando"); // animação para
-    const blob = new Blob(chunks, { type: "audio/webm" });
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      push(ref(db, "mensagens"), {
-        nick: nickname,
-        uid: uid,
-        tipo: "audio",
-        conteudo: reader.result,
-        hora: Date.now()
-      });
-    };
-    reader.readAsDataURL(blob);
+  mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+  mediaRecorder.onstop = () => {
+    const blob = new Blob(audioChunks, { type: "audio/webm" });
+    const url = URL.createObjectURL(blob);
+    const audio = document.createElement("audio");
+    audio.src = url;
+    audio.controls = true;
+    const preview = document.getElementById("previewAudio");
+    preview.innerHTML = "";
+    preview.appendChild(audio);
+
+    document.getElementById("enviarAudio").disabled = false;
   };
 
-  recorder.start();
-  setTimeout(() => recorder.stop(), 60000);
-  alert("Gravando... será enviado automaticamente após 60s.");
+  mediaRecorder.start();
+  document.getElementById("gravarBtn").disabled = true;
+  document.getElementById("pararBtn").disabled = false;
 };
+
+document.getElementById("pararBtn").onclick = () => {
+  mediaRecorder.stop();
+  document.getElementById("gravarBtn").disabled = false;
+  document.getElementById("pararBtn").disabled = true;
+};
+
+document.getElementById("cancelarAudio").onclick = () => {
+  document.getElementById("audioModal").classList.remove("show");
+  document.getElementById("previewAudio").innerHTML = "";
+  document.getElementById("enviarAudio").disabled = true;
+};
+
+document.getElementById("enviarAudio").onclick = () => {
+  const blob = new Blob(audioChunks, { type: "audio/webm" });
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    push(ref(db, "mensagens"), {
+      nick: nickname,
+      uid: uid,
+      tipo: "audio",
+      conteudo: reader.result,
+      hora: Date.now()
+    });
+  };
+  reader.readAsDataURL(blob);
+
+  document.getElementById("audioModal").classList.remove("show");
+  document.getElementById("previewAudio").innerHTML = "";
+  document.getElementById("enviarAudio").disabled = true;
+};
+
 
 usuariosBtn.onclick = () => painelUsuarios.classList.toggle("show");
 fecharUsuarios.onclick = () => painelUsuarios.classList.remove("show");
