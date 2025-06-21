@@ -27,6 +27,7 @@ if (!uid) {
 }
 
 const mural = document.getElementById("chat-mural");
+let horaEntradaLocal = Date.now();
 
 setTimeout(() => {
   const div = document.createElement("div");
@@ -62,7 +63,8 @@ const fecharUsuarios = document.getElementById("fecharUsuarios");
 const fecharConfig = document.getElementById("fecharConfig");
 
 const userRef = ref(db, "onlineUsers/" + uid);
-set(userRef, nickname);
+const horaEntrada = Date.now();
+set(userRef, { nome: nickname, hora: horaEntrada });
 window.addEventListener("beforeunload", () => remove(userRef));
 
 onValue(ref(db, "onlineUsers"), (snapshot) => {
@@ -113,12 +115,37 @@ document.addEventListener("click", (e) => {
 function enviarMensagem() {
   const texto = input.value.trim();
   if (!texto) return;
+  let privadoPara = null;
+  let privadoNick = null;
+  const match = texto.match(/^@([\w\d]+):(.*)$/);
+  if (match) {
+    privadoNick = match[1].trim();
+    texto = match[2].trim();
+    const snapshot = await get(ref(db, "onlineUsers"));
+    const users = snapshot.val() || {};
+    const targetUid = Object.entries(users).find(([_, name]) => name === privadoNick)?.[0];
+    if (targetUid) {
+      const pvSnap = await get(ref(db, `pvAtivos/${uid}/${targetUid}`));
+      if (pvSnap.exists()) {
+        privadoPara = targetUid;
+      } else {
+        alert("Você não tem PV ativo com este usuário.");
+        return;
+      }
+    } else {
+      alert("Usuário não encontrado.");
+      return;
+    }
+  }
+
   push(ref(db, "mensagens"), {
     nick: nickname,
     uid: uid,
     tipo: "texto",
     conteudo: texto,
-    hora: Date.now()
+    hora: Date.now(),
+    privadoPara: privadoPara,
+    privadoNick: privadoNick
   });
   input.value = "";
 }
@@ -130,36 +157,18 @@ input.addEventListener("keydown", (e) => {
 
 onChildAdded(ref(db, "mensagens"), (snap) => {
   const msg = snap.val();
+  if (msg.hora < horaEntradaLocal) return;
+
+  // Se for PV e o usuário não for parte, não mostra
+  if (msg.privadoPara && !(msg.uid === uid || msg.privadoPara === uid)) return;
+
   const div = document.createElement("div");
   const nickSpan = document.createElement("span");
-  nickSpan.textContent = `@${msg.nick}: `;
+  nickSpan.textContent = msg.privadoPara ? `🔒 [PV] @${msg.nick} para @${msg.privadoNick}: ` : `@${msg.nick}: `;
   nickSpan.style.fontWeight = "bold";
   nickSpan.style.color = msg.uid === uid ? "#00ffff" : "#ff00ff";
   div.appendChild(nickSpan);
 
-  if (msg.tipo === "texto") {
-    div.innerHTML += msg.conteudo;
-  } else if (msg.tipo === "img") {
-    const toggleBtn = document.createElement("button");
-    toggleBtn.textContent = "Ver imagem";
-    const img = document.createElement("img");
-    img.src = msg.conteudo;
-    img.style.maxWidth = "100%";
-    img.style.display = "none";
-    toggleBtn.onclick = () => {
-      img.style.display = img.style.display === "none" ? "block" : "none";
-      toggleBtn.textContent = img.style.display === "none" ? "Ver imagem" : "Ocultar";
-    };
-    div.appendChild(toggleBtn);
-    div.appendChild(img);
-  } else if (msg.tipo === "audio") {
-    const audio = document.createElement("audio");
-    audio.src = msg.conteudo;
-    audio.controls = true;
-    div.appendChild(audio);
-  }
-
-  mural.appendChild(div);
   if (document.getElementById("rolagemAuto")?.checked ?? true) {
     mural.scrollTop = mural.scrollHeight;
   }
@@ -173,12 +182,37 @@ imgBtn.onclick = () => {
     const file = fileInput.files[0];
     const reader = new FileReader();
     reader.onload = () => {
-      push(ref(db, "mensagens"), {
-        nick: nickname,
+      let privadoPara = null;
+  let privadoNick = null;
+  const match = texto.match(/^@([\w\d]+):(.*)$/);
+  if (match) {
+    privadoNick = match[1].trim();
+    texto = match[2].trim();
+    const snapshot = await get(ref(db, "onlineUsers"));
+    const users = snapshot.val() || {};
+    const targetUid = Object.entries(users).find(([_, name]) => name === privadoNick)?.[0];
+    if (targetUid) {
+      const pvSnap = await get(ref(db, `pvAtivos/${uid}/${targetUid}`));
+      if (pvSnap.exists()) {
+        privadoPara = targetUid;
+      } else {
+        alert("Você não tem PV ativo com este usuário.");
+        return;
+      }
+    } else {
+      alert("Usuário não encontrado.");
+      return;
+    }
+  }
+
+  push(ref(db, "mensagens"), {
+    nick: nickname,
         uid: uid,
         tipo: "img",
         conteudo: reader.result,
-        hora: Date.now()
+        hora: Date.now(),
+    privadoPara: privadoPara,
+    privadoNick: privadoNick
       });
     };
     reader.readAsDataURL(file);
@@ -234,12 +268,37 @@ document.getElementById("enviarAudio").onclick = () => {
   const blob = new Blob(audioChunks, { type: "audio/webm" });
   const reader = new FileReader();
   reader.onloadend = () => {
-    push(ref(db, "mensagens"), {
-      nick: nickname,
+    let privadoPara = null;
+  let privadoNick = null;
+  const match = texto.match(/^@([\w\d]+):(.*)$/);
+  if (match) {
+    privadoNick = match[1].trim();
+    texto = match[2].trim();
+    const snapshot = await get(ref(db, "onlineUsers"));
+    const users = snapshot.val() || {};
+    const targetUid = Object.entries(users).find(([_, name]) => name === privadoNick)?.[0];
+    if (targetUid) {
+      const pvSnap = await get(ref(db, `pvAtivos/${uid}/${targetUid}`));
+      if (pvSnap.exists()) {
+        privadoPara = targetUid;
+      } else {
+        alert("Você não tem PV ativo com este usuário.");
+        return;
+      }
+    } else {
+      alert("Usuário não encontrado.");
+      return;
+    }
+  }
+
+  push(ref(db, "mensagens"), {
+    nick: nickname,
       uid: uid,
       tipo: "audio",
       conteudo: reader.result,
-      hora: Date.now()
+      hora: Date.now(),
+    privadoPara: privadoPara,
+    privadoNick: privadoNick
     });
   };
   reader.readAsDataURL(blob);
