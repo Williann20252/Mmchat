@@ -1,34 +1,26 @@
-
-alert("JS funcionando!"); // Teste visual
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getDatabase, ref, set, push, onChildAdded, onValue, remove, update
+  getDatabase, ref, set, push, onChildAdded, onValue, remove, update, get
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
-  authDomain: "mmchat-f4f88.firebaseapp.com",
-  databaseURL: "https://mmchat-f4f88-default-rtdb.firebaseio.com",
-  projectId: "mmchat-f4f88",
-  storageBucket: "mmchat-f4f88.appspot.com",
-  messagingSenderId: "404598754438",
-  appId: "1:404598754438:web:6a0892895591430d851507"
-};
-
+const firebaseConfig = { /* suas credenciais */ };
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const nickname = localStorage.getItem("nickname") || "Anônimo";
+const nickname = localStorage.getItem("nickname") || prompt("Digite seu nickname:") || "Anônimo";
 let uid = localStorage.getItem("uid");
 if (!uid) {
   uid = "user_" + Math.random().toString(36).substring(2, 10);
   localStorage.setItem("uid", uid);
 }
 
+let isPremium = localStorage.getItem("isPremium") === "true";
+
 const mural = document.getElementById("chat-mural");
 const input = document.getElementById("mensagemInput");
 const enviarBtn = document.getElementById("enviarBtn");
+const pvMode = document.getElementById("pvMode");
+const pvSelect = document.getElementById("pvSelect");
 const usuariosBtn = document.getElementById("usuariosBtn");
 const configBtn = document.getElementById("configBtn");
 const listaUsuarios = document.getElementById("listaUsuarios");
@@ -39,237 +31,70 @@ const painelUsuarios = document.getElementById("usuariosOnline");
 const painelConfig = document.getElementById("configPainel");
 const fecharUsuarios = document.getElementById("fecharUsuarios");
 const fecharConfig = document.getElementById("fecharConfig");
+const premiumBtn = document.getElementById("premiumBtn");
 
-const userRef = ref(db, "onlineUsers/" + uid);
-set(userRef, nickname);
-window.addEventListener("beforeunload", () => remove(userRef));
+const horaEntradaLocal = Date.now();
+set(ref(db, `onlineUsers/${uid}`), { nome: nickname, premium: isPremium, horaEntrada: horaEntradaLocal });
+window.addEventListener("beforeunload", () => remove(ref(db, `onlineUsers/${uid}`)));
+
+premiumBtn.onclick = () => {
+  isPremium = true;
+  localStorage.setItem("isPremium", "true");
+  update(ref(db, `onlineUsers/${uid}`), { premium: true });
+  alert("Parabéns! Você agora é Premium.👍");
+};
+
+// Mensagem de boas-vindas
+setTimeout(() => {
+  const welcomeDiv = document.createElement('div');
+  welcomeDiv.className = 'msg-sistema';
+  welcomeDiv.innerHTML = `
+    👋 Olá, ${nickname}!<br>
+    Bem-vindo(a) ao MMChat!<br>
+    Considere ativar o <strong>Premium</strong> 💎 para manter este chat online.
+  `;
+  mural.appendChild(welcomeDiv);
+}, 1000);
 
 onValue(ref(db, "onlineUsers"), (snapshot) => {
   listaUsuarios.innerHTML = "";
+  pvSelect.innerHTML = '<option value="" disabled selected>Selecione usuário</option>';
   const data = snapshot.val() || {};
-  Object.entries(data).forEach(([key, name]) => {
+  Object.entries(data).forEach(([key, user]) => {
     const li = document.createElement("li");
-    li.textContent = name;
+    const displayName = user.nome;
+    const badge = user.premium ? `<span class='premium-badge' title='Premium'>💎</span>` : "";
+    li.innerHTML = `${displayName} ${badge}`;
     if (key !== uid) {
-      li.addEventListener("click", () => solicitarPV(key, name));
+      pvSelect.hidden = false;
+      const opt = document.createElement("option"); opt.value = key; opt.textContent = displayName;
+      pvSelect.appendChild(opt);
     }
     listaUsuarios.appendChild(li);
   });
 });
 
-function solicitarPV(destUid, destNick) {
-  push(ref(db, "pvSolicitacoes"), {
-    deUid: uid,
-    deNick: nickname,
-    paraUid: destUid,
-    paraNick: destNick,
-    status: "pendente"
-  });
-}
-
-onChildAdded(ref(db, "pvSolicitacoes"), (snap) => {
-  const s = snap.val();
-  if (s.paraUid === uid && s.status === "pendente") {
-    const div = document.createElement("div");
-    div.className = "msg-pv";
-    div.innerHTML = `<strong>@${s.deNick}</strong> deseja conversar reservadamente.
-      <button class='aceitarPV' data-id='${snap.key}'>Aceitar</button> 
-      <button class='recusarPV' data-id='${snap.key}'>Recusar</button>`;
-    mural.appendChild(div);
-  }
-});
-
-document.addEventListener("click", (e) => {
-  const key = e.target.dataset?.id;
-  if (e.target.classList.contains("aceitarPV")) {
-  const s = { ...e.target.dataset };
-  update(ref(db, `pvSolicitacoes/${key}`), { status: "aceito" });
-  set(ref(db, `pvAtivos/${uid}/${s.deUid}`), true);
-  set(ref(db, `pvAtivos/${s.deUid}/${uid}`), true);
-  }
-  if (e.target.classList.contains("recusarPV")) {
-    update(ref(db, `pvSolicitacoes/${key}`), { status: "recusado" });
-  }
-});
-
 function enviarMensagem() {
-  const texto = input.value.trim();
-  if (!texto) return;
-  let privadoPara = null;
-  let privadoNick = null;
-  const match = texto.match(/^@([\w\d]+):(.*)$/);
-  if (match) {
-    privadoNick = match[1].trim();
-    texto = match[2].trim();
-    const snapshot = await get(ref(db, "onlineUsers"));
-    const users = snapshot.val() || {};
-    const targetUid = Object.entries(users).find(([_, name]) => name === privadoNick)?.[0];
-    if (targetUid) {
-      const pvSnap = await get(ref(db, `pvAtivos/${uid}/${targetUid}`));
-      if (pvSnap.exists()) {
-        privadoPara = targetUid;
-      } else {
-        alert("Você não tem PV ativo com este usuário.");
-        return;
-      }
-    } else {
-      alert("Usuário não encontrado.");
-      return;
-    }
+  let texto = input.value.trim(); if (!texto) return;
+  if (pvMode.checked) {
+    const destUid = pvSelect.value; const destNick = pvSelect.options[pvSelect.selectedIndex].text;
+    if (!destUid) { alert("Selecione um usuário para PV."); return; }
+    push(ref(db, "mensagens"), { nick: nickname, uid, tipo: "pv", conteudo: texto, hora: Date.now(), privadoPara: destUid, privadoNick: destNick });
+  } else {
+    push(ref(db, "mensagens"), { nick: nickname, uid, tipo: "texto", conteudo: texto, hora: Date.now() });
   }
-
-  push(ref(db, "mensagens"), {
-    nick: nickname,
-    uid: uid,
-    tipo: "texto",
-    conteudo: texto,
-    hora: Date.now()
-  });
   input.value = "";
 }
 
 enviarBtn.onclick = enviarMensagem;
-input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") enviarMensagem();
-});
 
 onChildAdded(ref(db, "mensagens"), (snap) => {
   const msg = snap.val();
+  if (msg.tipo === "pv" && !(msg.uid === uid || msg.privadoPara === uid)) return;
   const div = document.createElement("div");
+  if (msg.tipo === "pv") div.className = "msg-pv";
   const nickSpan = document.createElement("span");
-  nickSpan.textContent = `@${msg.nick}: `;
-  nickSpan.style.fontWeight = "bold";
-  nickSpan.style.color = msg.uid === uid ? "#00ffff" : "#ff00ff";
-  div.appendChild(nickSpan);
-
-  if (msg.tipo === "texto") {
-    div.innerHTML += msg.conteudo;
-  } else if (msg.tipo === "img") {
-    const toggleBtn = document.createElement("button");
-    toggleBtn.textContent = "Ver imagem";
-    const img = document.createElement("img");
-    img.src = msg.conteudo;
-    img.style.maxWidth = "100%";
-    img.style.display = "none";
-    toggleBtn.onclick = () => {
-      img.style.display = img.style.display === "none" ? "block" : "none";
-      toggleBtn.textContent = img.style.display === "none" ? "Ver imagem" : "Ocultar";
-    };
-    div.appendChild(toggleBtn);
-    div.appendChild(img);
-  } else if (msg.tipo === "audio") {
-    const audio = document.createElement("audio");
-    audio.src = msg.conteudo;
-    audio.controls = true;
-    div.appendChild(audio);
-  }
-
-  mural.appendChild(div);
-  if (document.getElementById("rolagemAuto")?.checked ?? true) {
-    mural.scrollTop = mural.scrollHeight;
-  }
+  nickSpan.textContent = msg.tipo === "pv" ? `🔒 [PV] @${msg.nick}: ` : `@${msg.nick}: `;
+  div.appendChild(nickSpan); div.appendChild(document.createTextNode(msg.conteudo));
+  mural.appendChild(div); mural.scrollTop = mural.scrollHeight;
 });
-
-imgBtn.onclick = () => {
-  const fileInput = document.createElement("input");
-  fileInput.type = "file";
-  fileInput.accept = "image/*";
-  fileInput.onchange = () => {
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-      let privadoPara = null;
-  let privadoNick = null;
-  const match = texto.match(/^@([\w\d]+):(.*)$/);
-  if (match) {
-    privadoNick = match[1].trim();
-    texto = match[2].trim();
-    const snapshot = await get(ref(db, "onlineUsers"));
-    const users = snapshot.val() || {};
-    const targetUid = Object.entries(users).find(([_, name]) => name === privadoNick)?.[0];
-    if (targetUid) {
-      const pvSnap = await get(ref(db, `pvAtivos/${uid}/${targetUid}`));
-      if (pvSnap.exists()) {
-        privadoPara = targetUid;
-      } else {
-        alert("Você não tem PV ativo com este usuário.");
-        return;
-      }
-    } else {
-      alert("Usuário não encontrado.");
-      return;
-    }
-  }
-
-  push(ref(db, "mensagens"), {
-    nick: nickname,
-        uid: uid,
-        tipo: "img",
-        conteudo: reader.result,
-        hora: Date.now()
-      });
-    };
-    reader.readAsDataURL(file);
-  };
-  fileInput.click();
-};
-
-audioBtn.onclick = async () => {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  const recorder = new MediaRecorder(stream);
-  const chunks = [];
-
-  recorder.ondataavailable = (e) => chunks.push(e.data);
-  recorder.onstop = () => {
-    const blob = new Blob(chunks, { type: "audio/webm" });
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      let privadoPara = null;
-  let privadoNick = null;
-  const match = texto.match(/^@([\w\d]+):(.*)$/);
-  if (match) {
-    privadoNick = match[1].trim();
-    texto = match[2].trim();
-    const snapshot = await get(ref(db, "onlineUsers"));
-    const users = snapshot.val() || {};
-    const targetUid = Object.entries(users).find(([_, name]) => name === privadoNick)?.[0];
-    if (targetUid) {
-      const pvSnap = await get(ref(db, `pvAtivos/${uid}/${targetUid}`));
-      if (pvSnap.exists()) {
-        privadoPara = targetUid;
-      } else {
-        alert("Você não tem PV ativo com este usuário.");
-        return;
-      }
-    } else {
-      alert("Usuário não encontrado.");
-      return;
-    }
-  }
-
-  push(ref(db, "mensagens"), {
-    nick: nickname,
-        uid: uid,
-        tipo: "audio",
-        conteudo: reader.result,
-        hora: Date.now()
-      });
-    };
-    reader.readAsDataURL(blob);
-  };
-
-  recorder.start();
-  setTimeout(() => recorder.stop(), 60000);
-  alert("Gravando... será enviado automaticamente após 60s.");
-};
-
-usuariosBtn.onclick = () => painelUsuarios.classList.toggle("show");
-fecharUsuarios.onclick = () => painelUsuarios.classList.remove("show");
-configBtn.onclick = () => painelConfig.classList.toggle("show");
-fecharConfig.onclick = () => painelConfig.classList.remove("show");
-
-logoutBtn.onclick = () => {
-  remove(userRef);
-  localStorage.clear();
-  window.location.href = "../index.html";
-};
