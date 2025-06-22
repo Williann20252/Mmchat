@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MMChat – Sala Geral</title>
+  <link rel="stylesheet" href="chat.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="chat-header">
+    <h1>MMChat</h1>
+    <button id="logoutBtn">Sair</button>
+  </header>
+
+  <main class="chat-container">
+    
+<button id="alternarModoPV" style="margin-bottom: 10px; background:#ff9900; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; cursor:pointer;">👁️ Alternar modo PV/Geral</button>
+
+<section id="chat-mural" class="chat-mural"></section>
+
+    <div class="chat-input-area">
+      <input type="text" id="mensagemInput" placeholder="Digite sua mensagem…" />
+      <button id="enviarBtn">Enviar</button>
+    </div>
+
+    <div class="chat-tools">
+      <button id="imgBtn" title="Enviar imagem">📷</button>
+      <button id="audioBtn" title="Gravar áudio">🎤</button>
+      <button id="usuariosBtn" title="Usuários online">👥</button>
+      <button id="configBtn" title="Configurações">⚙️</button>
+    </div>
+  </main>
+
+  <!-- Painel de usuários online -->
+  <aside id="usuariosOnline" class="usuarios-sidebar">
+    <div class="sidebar-header" style="display:flex;justify-content:space-between;align-items:center;">
+      <h3>Usuários Online</h3>
+      <button id="fecharUsuarios" class="sidebar-close" title="Fechar painel">✖️</button>
+    </div>
+    <ul id="listaUsuarios"></ul>
+  </aside>
+
+  <!-- Painel de configurações -->
+  <aside id="configPainel" class="config-sidebar">
+    <div class="sidebar-header" style="display:flex;justify-content:space-between;align-items:center;">
+      <h3>⚙️ Configurações</h3>
+      <button id="fecharConfig" class="sidebar-close" title="Fechar painel">✖️</button>
+    </div>
+
+    <label>Cor da fonte:
+      <input type="color" id="corFonte" />
+    </label>
+    <br /><br />
+
+    <label>Cor do nick:
+      <input type="color" id="corNick" />
+    </label>
+    <br /><br />
+
+    <label>
+      <input type="checkbox" id="rolagemAuto" checked />
+      Rolagem automática
+    </label>
+    <br /><br />
+
+    <label>
+      <input type="checkbox" id="gradienteNick" />
+      Gradiente no nick (Premium)
+    </label>
+  </aside>
+
+  <script type="module" src="chat_corrigido.js" defer></script>
+</body>
+</html>
