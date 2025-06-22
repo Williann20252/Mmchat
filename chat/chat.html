@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MMChat – Sala Geral</title>
+  <link rel="stylesheet" href="chat.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="chat-header">
+    <h1>MMChat</h1>
+    <button id="logoutBtn">Sair</button>
+  </header>
+
+  <main class="chat-container">
+    <section id="chat-mural" class="chat-mural"></section>
+
+    <div class="chat-input-area">
+      <input type="text" id="mensagemInput" placeholder="Digite sua mensagem…" />
+      <button id="enviarBtn">Enviar</button>
+      <label class="pv-toggle">
+        <input type="checkbox" id="pvMode" /> Privado
+      </label>
+      <select id="pvSelect" hidden>
+        <option value="" disabled selected>Selecione usuário</option>
+      </select>
+    </div>
+
+    <div class="chat-tools">
+      <button id="imgBtn" title="Enviar imagem">📷</button>
+      <button id="audioBtn" title="Gravar áudio">🎤</button>
+      <button id="usuariosBtn" title="Usuários online">👥</button>
+      <button id="configBtn" title="Configurações">⚙️</button>
+      <button id="gameBtn" title="Jogo 21">🂡</button>
+    </div>
+  </main>
+
+  <aside id="usuariosOnline" class="usuarios-sidebar">
+    <div class="sidebar-header">
+      <h3>Usuários Online</h3>
+      <button id="fecharUsuarios" class="sidebar-close">✖️</button>
+    </div>
+    <ul id="listaUsuarios"></ul>
+  </aside>
+
+  <aside id="configPainel" class="config-sidebar">
+    <div class="sidebar-header">
+      <h3>⚙️ Configurações</h3>
+      <button id="fecharConfig" class="sidebar-close">✖️</button>
+    </div>
+    <div class="config-section">
+      <label>Cor da fonte:
+        <input type="color" id="corFonte" />
+      </label>
+      <label>Cor do nick:
+        <input type="color" id="corNick" />
+      </label>
+      <label>
+        <input type="checkbox" id="rolagemAuto" checked />
+        Rolagem automática
+      </label>
+      <label>
+        <input type="checkbox" id="gradienteNick" />
+        Gradiente no nick (Premium)
+      </label>
+    </div>
+    <div class="premium-section">
+      <button id="premiumBtn">Ativar Premium</button>
+    </div>
+  </aside>
+
+  <aside id="gamePanel" class="game-sidebar">
+    <div class="sidebar-header">
+      <h3>Jogo de 21</h3>
+      <button id="closeGame" class="sidebar-close">✖️</button>
+    </div>
+    <div class="game-content">
+      <div class="hand">
+        <h4>Sua mão (<span id="playerScore">0</span>)</h4>
+        <div id="playerCards" class="cards"></div>
+      </div>
+      <div class="hand">
+        <h4>Dealer (<span id="dealerScore">0</span>)</h4>
+        <div id="dealerCards" class="cards"></div>
+      </div>
+      <div class="game-controls">
+        <button id="hitBtn">Pedir carta</button>
+        <button id="standBtn">Parar</button>
+        <button id="resetGameBtn">Reiniciar</button>
+      </div>
+      <div id="gameResult" class="game-result"></div>
+    </div>
+  </aside>
+
+  <script type="module" src="chat_corrigido.js" defer></script>
+</body>
+</html>
