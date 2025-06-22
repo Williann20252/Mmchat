@@ -27,6 +27,7 @@ if (!uid) {
 }
 
 const mural = document.getElementById("chat-mural");
+let modoPVAtivo = localStorage.getItem("modoPV") === "true";
 const input = document.getElementById("mensagemInput");
 const enviarBtn = document.getElementById("enviarBtn");
 const usuariosBtn = document.getElementById("usuariosBtn");
@@ -44,17 +45,34 @@ const userRef = ref(db, "onlineUsers/" + uid);
 set(userRef, nickname);
 window.addEventListener("beforeunload", () => remove(userRef));
 
+
 onValue(ref(db, "onlineUsers"), (snapshot) => {
   listaUsuarios.innerHTML = "";
   const data = snapshot.val() || {};
-  Object.entries(data).forEach(([key, name]) => {
+  Object.entries(data).forEach(([key, val]) => {
+    const name = val.nome || val;
     const li = document.createElement("li");
-    li.textContent = name;
-    if (key !== uid) {
-      li.addEventListener("click", () => solicitarPV(key, name));
+
+    if (key === uid) {
+      li.textContent = `${name} (Você)`;
+      listaUsuarios.appendChild(li);
+    } else {
+      const ativoRef = ref(db, `pvAtivos/${uid}/${key}`);
+      get(ativoRef).then(snap => {
+        let botoes = `
+          <button class="btn-pv" data-uid="${key}" data-nick="${name}" title="Falar no PV">🗨️</button>
+          <button class="btn-bloquear" data-uid="${key}" title="Bloquear">🚫</button>
+        `;
+        if (snap.exists()) {
+          botoes += `<button class="btn-encerrar" data-uid="${key}" data-nick="${name}" title="Encerrar PV">❌</button>`;
+        }
+        li.innerHTML = `${name} ${botoes}`;
+        listaUsuarios.appendChild(li);
+      });
     }
-    listaUsuarios.appendChild(li);
   });
+});
+
 });
 
 function solicitarPV(destUid, destNick) {
@@ -71,6 +89,7 @@ onChildAdded(ref(db, "pvSolicitacoes"), (snap) => {
   const s = snap.val();
   if (s.paraUid === uid && s.status === "pendente") {
     const div = document.createElement("div");
+  if (msg.privadoPara) div.className = "msg-pv";
     div.className = "msg-pv";
     div.innerHTML = `<strong>@${s.deNick}</strong> deseja conversar reservadamente.
       <button class='aceitarPV' data-id='${snap.key}'>Aceitar</button> 
@@ -110,6 +129,7 @@ input.addEventListener("keydown", (e) => {
 onChildAdded(ref(db, "mensagens"), (snap) => {
   const msg = snap.val();
   const div = document.createElement("div");
+  if (msg.privadoPara) div.className = "msg-pv";
   const nickSpan = document.createElement("span");
   nickSpan.textContent = `@${msg.nick}: `;
   nickSpan.style.fontWeight = "bold";
@@ -200,4 +220,35 @@ logoutBtn.onclick = () => {
   remove(userRef);
   localStorage.clear();
   window.location.href = "../index.html";
+};
+
+
+
+document.getElementById("alternarModo").textContent = modoPVAtivo ? "🔁 Ver tudo" : "🔁 Ver apenas PV";
+
+document.getElementById("alternarModo").onclick = () => {
+  modoPVAtivo = !modoPVAtivo;
+  localStorage.setItem("modoPV", modoPVAtivo);
+
+  modoPVAtivo = !modoPVAtivo;
+  document.getElementById("alternarModo").textContent = modoPVAtivo ? "🔁 Ver tudo" : "🔁 Ver apenas PV";
+  mural.innerHTML = "";
+  get(ref(db, "mensagens")).then(snap => {
+    snap.forEach(child => {
+      const msg = child.val();
+      if (msg.hora < horaEntradaLocal) return;
+      if (msg.privadoPara && !(msg.uid === uid || msg.privadoPara === uid)) return;
+      if (modoPVAtivo && !msg.privadoPara) return;
+
+      const div = document.createElement("div");
+      if (msg.privadoPara) div.className = "msg-pv";
+      const nickSpan = document.createElement("span");
+      nickSpan.textContent = msg.privadoPara ? `🔒 [PV] @${msg.nick} para @${msg.privadoNick}: ` : `@${msg.nick}: `;
+      nickSpan.style.fontWeight = "bold";
+      nickSpan.style.color = msg.uid === uid ? "#00ffff" : "#ff00ff";
+      div.appendChild(nickSpan);
+      div.appendChild(document.createTextNode(" " + msg.conteudo));
+      mural.appendChild(div);
+    });
+  });
 };

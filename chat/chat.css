@@ -55,3 +55,35 @@ body { font-family: 'Inter', sans-serif; background: linear-gradient(to right, #
 
 @media (max-width: 600px) { .usuarios-sidebar, .config-sidebar, .pv-modal { width: 95%; } }
 
+
+
+.msg-sistema {
+  background: rgba(0, 0, 0, 0.5);
+  border-left: 4px solid #4fc3f7;
+  color: #ffffff;
+  padding: 10px 15px;
+  margin: 10px auto;
+  max-width: 90%;
+  border-radius: 10px;
+  font-weight: 500;
+  font-style: italic;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  text-align: center;
+}
+
+
+.modo-toggle {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  z-index: 999;
+  background: linear-gradient(45deg, #6a11cb, #2575fc);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
