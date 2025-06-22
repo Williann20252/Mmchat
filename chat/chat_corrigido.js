@@ -82,7 +82,10 @@ onChildAdded(ref(db, "pvSolicitacoes"), (snap) => {
 document.addEventListener("click", (e) => {
   const key = e.target.dataset?.id;
   if (e.target.classList.contains("aceitarPV")) {
-    update(ref(db, `pvSolicitacoes/${key}`), { status: "aceito" });
+  const s = { ...e.target.dataset };
+  update(ref(db, `pvSolicitacoes/${key}`), { status: "aceito" });
+  set(ref(db, `pvAtivos/${uid}/${s.deUid}`), true);
+  set(ref(db, `pvAtivos/${s.deUid}/${uid}`), true);
   }
   if (e.target.classList.contains("recusarPV")) {
     update(ref(db, `pvSolicitacoes/${key}`), { status: "recusado" });
@@ -92,6 +95,29 @@ document.addEventListener("click", (e) => {
 function enviarMensagem() {
   const texto = input.value.trim();
   if (!texto) return;
+  let privadoPara = null;
+  let privadoNick = null;
+  const match = texto.match(/^@([\w\d]+):(.*)$/);
+  if (match) {
+    privadoNick = match[1].trim();
+    texto = match[2].trim();
+    const snapshot = await get(ref(db, "onlineUsers"));
+    const users = snapshot.val() || {};
+    const targetUid = Object.entries(users).find(([_, name]) => name === privadoNick)?.[0];
+    if (targetUid) {
+      const pvSnap = await get(ref(db, `pvAtivos/${uid}/${targetUid}`));
+      if (pvSnap.exists()) {
+        privadoPara = targetUid;
+      } else {
+        alert("Você não tem PV ativo com este usuário.");
+        return;
+      }
+    } else {
+      alert("Usuário não encontrado.");
+      return;
+    }
+  }
+
   push(ref(db, "mensagens"), {
     nick: nickname,
     uid: uid,
@@ -152,8 +178,31 @@ imgBtn.onclick = () => {
     const file = fileInput.files[0];
     const reader = new FileReader();
     reader.onload = () => {
-      push(ref(db, "mensagens"), {
-        nick: nickname,
+      let privadoPara = null;
+  let privadoNick = null;
+  const match = texto.match(/^@([\w\d]+):(.*)$/);
+  if (match) {
+    privadoNick = match[1].trim();
+    texto = match[2].trim();
+    const snapshot = await get(ref(db, "onlineUsers"));
+    const users = snapshot.val() || {};
+    const targetUid = Object.entries(users).find(([_, name]) => name === privadoNick)?.[0];
+    if (targetUid) {
+      const pvSnap = await get(ref(db, `pvAtivos/${uid}/${targetUid}`));
+      if (pvSnap.exists()) {
+        privadoPara = targetUid;
+      } else {
+        alert("Você não tem PV ativo com este usuário.");
+        return;
+      }
+    } else {
+      alert("Usuário não encontrado.");
+      return;
+    }
+  }
+
+  push(ref(db, "mensagens"), {
+    nick: nickname,
         uid: uid,
         tipo: "img",
         conteudo: reader.result,
@@ -175,8 +224,31 @@ audioBtn.onclick = async () => {
     const blob = new Blob(chunks, { type: "audio/webm" });
     const reader = new FileReader();
     reader.onloadend = () => {
-      push(ref(db, "mensagens"), {
-        nick: nickname,
+      let privadoPara = null;
+  let privadoNick = null;
+  const match = texto.match(/^@([\w\d]+):(.*)$/);
+  if (match) {
+    privadoNick = match[1].trim();
+    texto = match[2].trim();
+    const snapshot = await get(ref(db, "onlineUsers"));
+    const users = snapshot.val() || {};
+    const targetUid = Object.entries(users).find(([_, name]) => name === privadoNick)?.[0];
+    if (targetUid) {
+      const pvSnap = await get(ref(db, `pvAtivos/${uid}/${targetUid}`));
+      if (pvSnap.exists()) {
+        privadoPara = targetUid;
+      } else {
+        alert("Você não tem PV ativo com este usuário.");
+        return;
+      }
+    } else {
+      alert("Usuário não encontrado.");
+      return;
+    }
+  }
+
+  push(ref(db, "mensagens"), {
+    nick: nickname,
         uid: uid,
         tipo: "audio",
         conteudo: reader.result,
