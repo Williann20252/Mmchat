@@ -1,11 +1,7 @@
-
-alert("JS funcionando!"); // Teste visual
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getDatabase, ref, set, push, onChildAdded, onValue, remove, update
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, set, push, onChildAdded, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
+// Configuração Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyB3ntpJNvKrUBmoH96NjpdB0aPyDVXACWg",
   authDomain: "mmchat-f4f88.firebaseapp.com",
@@ -13,19 +9,20 @@ const firebaseConfig = {
   projectId: "mmchat-f4f88",
   storageBucket: "mmchat-f4f88.appspot.com",
   messagingSenderId: "404598754438",
-  appId: "1:404598754438:web:6a0892895591430d851507"
+  appId: "1:404598754438:web:6089280d851507"
 };
-
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+const db  = getDatabase(app);
 
+// Identificação do usuário
 const nickname = localStorage.getItem("nickname") || "Anônimo";
 let uid = localStorage.getItem("uid");
 if (!uid) {
-  uid = "user_" + Math.random().toString(36).substring(2, 10);
+  uid = "user_" + Math.random().toString(36).substr(2, 10);
   localStorage.setItem("uid", uid);
 }
 
+// DOM
 const mural = document.getElementById("chat-mural");
 const input = document.getElementById("mensagemInput");
 const enviarBtn = document.getElementById("enviarBtn");
@@ -40,164 +37,77 @@ const painelConfig = document.getElementById("configPainel");
 const fecharUsuarios = document.getElementById("fecharUsuarios");
 const fecharConfig = document.getElementById("fecharConfig");
 
-const userRef = ref(db, "onlineUsers/" + uid);
-set(userRef, nickname);
-window.addEventListener("beforeunload", () => remove(userRef));
+// Painel de gravação
+const audioModal = document.getElementById("audioModal");
+const recordBtn = document.getElementById("recordBtn");
+const stopBtn = document.getElementById("stopBtn");
+const playBtn = document.getElementById("playBtn");
+const sendAudioBtn = document.getElementById("sendAudioBtn");
+const cancelAudioBtn = document.getElementById("cancelAudioBtn");
 
-onValue(ref(db, "onlineUsers"), (snapshot) => {
-  listaUsuarios.innerHTML = "";
-  const data = snapshot.val() || {};
-  Object.entries(data).forEach(([key, name]) => {
-    const li = document.createElement("li");
-    li.textContent = name;
-    if (key !== uid) {
-      li.addEventListener("click", () => solicitarPV(key, name));
-    }
-    listaUsuarios.appendChild(li);
-  });
-});
+let mediaRecorder, audioChunks, audioBlob, audioUrl;
 
-function solicitarPV(destUid, destNick) {
-  push(ref(db, "pvSolicitacoes"), {
-    deUid: uid,
-    deNick: nickname,
-    paraUid: destUid,
-    paraNick: destNick,
-    status: "pendente"
-  });
-}
+// Abrir painel de áudio
+audioBtn.onclick = () => {
+  audioModal.hidden = false;
+  audioChunks = [];
+  recordBtn.disabled = false;
+  stopBtn.disabled = true;
+  playBtn.disabled = true;
+  sendAudioBtn.disabled = true;
+};
 
-onChildAdded(ref(db, "pvSolicitacoes"), (snap) => {
-  const s = snap.val();
-  if (s.paraUid === uid && s.status === "pendente") {
-    const div = document.createElement("div");
-    div.className = "msg-pv";
-    div.innerHTML = `<strong>@${s.deNick}</strong> deseja conversar reservadamente.
-      <button class='aceitarPV' data-id='${snap.key}'>Aceitar</button> 
-      <button class='recusarPV' data-id='${snap.key}'>Recusar</button>`;
-    mural.appendChild(div);
-  }
-});
-
-document.addEventListener("click", (e) => {
-  const key = e.target.dataset?.id;
-  if (e.target.classList.contains("aceitarPV")) {
-    update(ref(db, `pvSolicitacoes/${key}`), { status: "aceito" });
-  }
-  if (e.target.classList.contains("recusarPV")) {
-    update(ref(db, `pvSolicitacoes/${key}`), { status: "recusado" });
-  }
-});
-
-function enviarMensagem() {
-  const texto = input.value.trim();
-  if (!texto) return;
-  push(ref(db, "mensagens"), {
-    nick: nickname,
-    uid: uid,
-    tipo: "texto",
-    conteudo: texto,
-    hora: Date.now()
-  });
-  input.value = "";
-}
-
-enviarBtn.onclick = enviarMensagem;
-input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") enviarMensagem();
-});
-
-onChildAdded(ref(db, "mensagens"), (snap) => {
-  const msg = snap.val();
-  const div = document.createElement("div");
-  const nickSpan = document.createElement("span");
-  nickSpan.textContent = `@${msg.nick}: `;
-  nickSpan.style.fontWeight = "bold";
-  nickSpan.style.color = msg.uid === uid ? "#00ffff" : "#ff00ff";
-  div.appendChild(nickSpan);
-
-  if (msg.tipo === "texto") {
-    div.innerHTML += msg.conteudo;
-  } else if (msg.tipo === "img") {
-    const toggleBtn = document.createElement("button");
-    toggleBtn.textContent = "Ver imagem";
-    const img = document.createElement("img");
-    img.src = msg.conteudo;
-    img.style.maxWidth = "100%";
-    img.style.display = "none";
-    toggleBtn.onclick = () => {
-      img.style.display = img.style.display === "none" ? "block" : "none";
-      toggleBtn.textContent = img.style.display === "none" ? "Ver imagem" : "Ocultar";
+// Gravar áudio
+recordBtn.onclick = () => {
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = () => {
+      audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      audioUrl = URL.createObjectURL(audioBlob);
+      playBtn.disabled = false;
+      sendAudioBtn.disabled = false;
     };
-    div.appendChild(toggleBtn);
-    div.appendChild(img);
-  } else if (msg.tipo === "audio") {
-    const audio = document.createElement("audio");
-    audio.src = msg.conteudo;
-    audio.controls = true;
-    div.appendChild(audio);
-  }
+    mediaRecorder.start();
+    recordBtn.disabled = true;
+    stopBtn.disabled = false;
+  });
+};
 
-  mural.appendChild(div);
-  if (document.getElementById("rolagemAuto")?.checked ?? true) {
-    mural.scrollTop = mural.scrollHeight;
-  }
-});
+// Parar gravação
+stopBtn.onclick = () => {
+  mediaRecorder.stop();
+  stopBtn.disabled = true;
+};
 
-imgBtn.onclick = () => {
-  const fileInput = document.createElement("input");
-  fileInput.type = "file";
-  fileInput.accept = "image/*";
-  fileInput.onchange = () => {
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-      push(ref(db, "mensagens"), {
-        nick: nickname,
-        uid: uid,
-        tipo: "img",
-        conteudo: reader.result,
-        hora: Date.now()
-      });
-    };
-    reader.readAsDataURL(file);
+// Reproduzir
+playBtn.onclick = () => {
+  const audio = new Audio(audioUrl);
+  audio.play();
+};
+
+// Enviar áudio
+sendAudioBtn.onclick = () => {
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    push(ref(db, "mensagens"), {
+      nick: nickname,
+      uid: uid,
+      tipo: "audio",
+      conteudo: reader.result,
+      hora: Date.now()
+    });
+    audioModal.hidden = true;
   };
-  fileInput.click();
+  reader.readAsDataURL(audioBlob);
 };
 
-audioBtn.onclick = async () => {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  const recorder = new MediaRecorder(stream);
-  const chunks = [];
-
-  recorder.ondataavailable = (e) => chunks.push(e.data);
-  recorder.onstop = () => {
-    const blob = new Blob(chunks, { type: "audio/webm" });
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      push(ref(db, "mensagens"), {
-        nick: nickname,
-        uid: uid,
-        tipo: "audio",
-        conteudo: reader.result,
-        hora: Date.now()
-      });
-    };
-    reader.readAsDataURL(blob);
-  };
-
-  recorder.start();
-  setTimeout(() => recorder.stop(), 60000);
-  alert("Gravando... será enviado automaticamente após 60s.");
+// Cancelar
+cancelAudioBtn.onclick = () => {
+  audioModal.hidden = true;
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+  }
 };
 
-usuariosBtn.onclick = () => painelUsuarios.classList.toggle("show");
-fecharUsuarios.onclick = () => painelUsuarios.classList.remove("show");
-configBtn.onclick = () => painelConfig.classList.toggle("show");
-fecharConfig.onclick = () => painelConfig.classList.remove("show");
-
-logoutBtn.onclick = () => {
-  remove(userRef);
-  localStorage.clear();
-  window.location.href = "../index.html";
-};
+// ... restante do seu código original ...

@@ -23,7 +23,7 @@
 
     <div class="chat-tools">
       <button id="imgBtn" title="Enviar imagem">📷</button>
-      <button id="audioBtn" title="Gravar áudio">🎤</button>
+      <button id="audioBtn" title="Gravar áudio">🎙️</button>
       <button id="usuariosBtn" title="Usuários online">👥</button>
       <button id="configBtn" title="Configurações">⚙️</button>
     </div>
@@ -44,28 +44,33 @@
       <h3>⚙️ Configurações</h3>
       <button id="fecharConfig" class="sidebar-close" title="Fechar painel">✖️</button>
     </div>
-
     <label>Cor da fonte:
       <input type="color" id="corFonte" />
     </label>
     <br /><br />
-
     <label>Cor do nick:
       <input type="color" id="corNick" />
     </label>
     <br /><br />
-
     <label>
       <input type="checkbox" id="rolagemAuto" checked />
       Rolagem automática
     </label>
     <br /><br />
-
     <label>
       <input type="checkbox" id="gradienteNick" />
       Gradiente no nick (Premium)
     </label>
   </aside>
+
+  <!-- Modal Gravação de Áudio -->
+  <div id="audioModal" class="audio-modal" hidden>
+    <button id="recordBtn">Gravar</button>
+    <button id="stopBtn" disabled>Parar</button>
+    <button id="playBtn" disabled>Ouvir</button>
+    <button id="sendAudioBtn" disabled>Enviar</button>
+    <button id="cancelAudioBtn">Cancelar</button>
+  </div>
 
   <script type="module" src="chat_corrigido.js" defer></script>
 </body>
