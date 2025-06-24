@@ -19,12 +19,6 @@
     <div class="chat-input-area">
       <input type="text" id="mensagemInput" placeholder="Digite sua mensagem…" />
       <button id="enviarBtn">Enviar</button>
-      <label class="pv-toggle">
-        <input type="checkbox" id="pvMode" /> Privado
-      </label>
-      <select id="pvSelect" hidden>
-        <option value="" disabled selected>Selecione usuário</option>
-      </select>
     </div>
 
     <div class="chat-tools">
@@ -32,65 +26,45 @@
       <button id="audioBtn" title="Gravar áudio">🎤</button>
       <button id="usuariosBtn" title="Usuários online">👥</button>
       <button id="configBtn" title="Configurações">⚙️</button>
-      <button id="gameBtn" title="Jogo 21">🂡</button>
     </div>
   </main>
 
+  <!-- Painel de usuários online -->
   <aside id="usuariosOnline" class="usuarios-sidebar">
-    <div class="sidebar-header">
+    <div class="sidebar-header" style="display:flex;justify-content:space-between;align-items:center;">
       <h3>Usuários Online</h3>
-      <button id="fecharUsuarios" class="sidebar-close">✖️</button>
+      <button id="fecharUsuarios" class="sidebar-close" title="Fechar painel">✖️</button>
     </div>
     <ul id="listaUsuarios"></ul>
   </aside>
 
+  <!-- Painel de configurações -->
   <aside id="configPainel" class="config-sidebar">
-    <div class="sidebar-header">
+    <div class="sidebar-header" style="display:flex;justify-content:space-between;align-items:center;">
       <h3>⚙️ Configurações</h3>
-      <button id="fecharConfig" class="sidebar-close">✖️</button>
+      <button id="fecharConfig" class="sidebar-close" title="Fechar painel">✖️</button>
     </div>
-    <div class="config-section">
-      <label>Cor da fonte:
-        <input type="color" id="corFonte" />
-      </label>
-      <label>Cor do nick:
-        <input type="color" id="corNick" />
-      </label>
-      <label>
-        <input type="checkbox" id="rolagemAuto" checked />
-        Rolagem automática
-      </label>
-      <label>
-        <input type="checkbox" id="gradienteNick" />
-        Gradiente no nick (Premium)
-      </label>
-    </div>
-    <div class="premium-section">
-      <button id="premiumBtn">Ativar Premium</button>
-    </div>
-  </aside>
 
-  <aside id="gamePanel" class="game-sidebar">
-    <div class="sidebar-header">
-      <h3>Jogo de 21</h3>
-      <button id="closeGame" class="sidebar-close">✖️</button>
-    </div>
-    <div class="game-content">
-      <div class="hand">
-        <h4>Sua mão (<span id="playerScore">0</span>)</h4>
-        <div id="playerCards" class="cards"></div>
-      </div>
-      <div class="hand">
-        <h4>Dealer (<span id="dealerScore">0</span>)</h4>
-        <div id="dealerCards" class="cards"></div>
-      </div>
-      <div class="game-controls">
-        <button id="hitBtn">Pedir carta</button>
-        <button id="standBtn">Parar</button>
-        <button id="resetGameBtn">Reiniciar</button>
-      </div>
-      <div id="gameResult" class="game-result"></div>
-    </div>
+    <label>Cor da fonte:
+      <input type="color" id="corFonte" />
+    </label>
+    <br /><br />
+
+    <label>Cor do nick:
+      <input type="color" id="corNick" />
+    </label>
+    <br /><br />
+
+    <label>
+      <input type="checkbox" id="rolagemAuto" checked />
+      Rolagem automática
+    </label>
+    <br /><br />
+
+    <label>
+      <input type="checkbox" id="gradienteNick" />
+      Gradiente no nick (Premium)
+    </label>
   </aside>
 
   <script type="module" src="chat_corrigido.js" defer></script>
