@@ -1,16 +1,74 @@
-
 /* Reset básico */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family:'Inter',sans-serif; background:linear-gradient(to right,#0f2027,#203a43,#2c5364); color:#fff; display:flex; flex-direction:column; align-items:center; min-height:100vh;}
-.chat-header { width:100%; padding:1rem; background:#112d4e; display:flex; justify-content:space-between; align-items:center; color:#fff; }
-.chat-container { display:flex; flex-direction:column; width:100%; max-width:600px; flex-grow:1; padding:1rem; }
-.chat-mural { background:#fff; color:#333; flex-grow:1; padding:1rem; overflow-y:auto; height:60vh; border-radius:8px; margin-bottom:1rem; }
-.chat-input-area { display:flex; gap:.5rem; margin-bottom:1rem; }
-.chat-input-area input { flex-grow:1; padding:.75rem; border-radius:6px; border:none; }
-.chat-input-area button { padding:.75rem 1rem; background-color:#4da8da; color:#fff; border:none; border-radius:6px; cursor:pointer; }
-.chat-tools { display:flex; justify-content:space-between; padding:.5rem 0;}
-.chat-tools button { background:#4da8da; border:none; padding:.6rem .8rem; border-radius:6px; color:#fff; cursor:pointer;}
-/* Audio Modal */
-.audio-modal { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(17,45,78,0.95); padding:1rem; border-radius:8px; display:flex; gap:.5rem; z-index:1000;}
-.audio-modal button { background:#4da8da; border:none; padding:.5rem .75rem; border-radius:6px; color:#fff; cursor:pointer; }
-.audio-modal button:disabled { opacity:.5; cursor:not-allowed; }
+* {margin:0;padding:0;box-sizing:border-box;}
+
+body{font-family:'Inter',sans-serif;
+     background:linear-gradient(to right,#0f2027,#203a43,#2c5364);
+     color:#fff;display:flex;flex-direction:column;
+     align-items:center;min-height:100vh;}
+
+.chat-header{width:100%;padding:1rem;background:#112d4e;
+             display:flex;justify-content:space-between;
+             align-items:center;color:#fff;}
+
+.chat-header h1{font-size:1.5rem;font-weight:600;}
+.chat-header button{background:#f67280;border:none;
+                    padding:.5rem 1rem;color:#fff;
+                    border-radius:8px;cursor:pointer;}
+
+.chat-container{display:flex;flex-direction:column;
+                width:100%;max-width:600px;
+                flex-grow:1;padding:1rem;}
+
+.chat-mural{background:#fff;color:#333;flex-grow:1;
+            padding:1rem;overflow-y:auto;height:60vh;
+            border-radius:8px;margin-bottom:1rem;
+            position:relative;}
+
+.chat-input-area{display:flex;gap:.5rem;margin-bottom:1rem;}
+.chat-input-area input{flex-grow:1;padding:.75rem;
+                       border-radius:6px;border:none;}
+.chat-input-area button{padding:.75rem 1rem;
+                        background:#4da8da;color:#fff;
+                        border:none;border-radius:6px;
+                        cursor:pointer;}
+
+.chat-tools{display:flex;justify-content:space-between;
+            padding:.5rem 0;}
+.chat-tools button{background:#4da8da;border:none;
+                   padding:.6rem .8rem;font-size:1.2rem;
+                   border-radius:6px;color:#fff;
+                   cursor:pointer;transition:background .3s;}
+.chat-tools button:hover{background:#3b8dbd;}
+
+/* Dropdown tool-item */
+.chat-tools .tool-item{position:relative;}
+.usuarios-sidebar,.config-sidebar{
+  position:absolute;top:100%;right:0;
+  display:none;width:240px;
+  background:rgba(17,45,78,0.95);
+  padding:1rem;border-radius:8px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.3);
+}
+.usuarios-sidebar.show,.config-sidebar.show{
+  display:block;
+}
+.sidebar-header{display:flex;justify-content:space-between;
+               align-items:center;}
+.sidebar-close{background:transparent;border:none;
+               color:#fff;font-size:1.2rem;cursor:pointer;}
+
+/* Destaque de menção */
+.mention{background:linear-gradient(90deg,#ffeb3b,#ffc107);
+         padding:0 .2rem;border-radius:3px;color:#000;}
+
+/* Animação de nova mensagem */
+@keyframes newMsg{
+  from{background:rgba(77,168,218,0.3);}to{background:transparent;}
+}
+.msg-new{animation:newMsg 1s ease-out;}
+
+/* ... demais estilos ... */
+
+@media(max-width:600px){
+  .usuarios-sidebar,.config-sidebar{width:95%;}
+}
