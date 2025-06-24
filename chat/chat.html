@@ -19,6 +19,13 @@
     <div class="chat-input-area">
       <input type="text" id="mensagemInput" placeholder="Digite sua mensagem…" />
       <button id="enviarBtn">Enviar</button>
+
+      <label class="pv-toggle">
+        <input type="checkbox" id="pvMode" /> Privado
+      </label>
+      <select id="pvSelect" hidden>
+        <option value="" disabled selected>Selecione usuário</option>
+      </select>
     </div>
 
     <div class="chat-tools">
@@ -29,7 +36,6 @@
     </div>
   </main>
 
-  <!-- Painel de usuários online -->
   <aside id="usuariosOnline" class="usuarios-sidebar">
     <div class="sidebar-header" style="display:flex;justify-content:space-between;align-items:center;">
       <h3>Usuários Online</h3>
@@ -38,7 +44,6 @@
     <ul id="listaUsuarios"></ul>
   </aside>
 
-  <!-- Painel de configurações -->
   <aside id="configPainel" class="config-sidebar">
     <div class="sidebar-header" style="display:flex;justify-content:space-between;align-items:center;">
       <h3>⚙️ Configurações</h3>
