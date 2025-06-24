@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, push, onChildAdded, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, set, push, onChildAdded, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 // Configuração Firebase
 const firebaseConfig = {
@@ -14,7 +14,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
 
-// Identificação do usuário
 const nickname = localStorage.getItem("nickname") || "Anônimo";
 let uid = localStorage.getItem("uid");
 if (!uid) {
@@ -47,7 +46,6 @@ const cancelAudioBtn = document.getElementById("cancelAudioBtn");
 
 let mediaRecorder, audioChunks, audioBlob, audioUrl;
 
-// Abrir painel de áudio
 audioBtn.onclick = () => {
   audioModal.hidden = false;
   audioChunks = [];
@@ -73,19 +71,16 @@ recordBtn.onclick = () => {
     stopBtn.disabled = false;
   });
 };
-
 // Parar gravação
 stopBtn.onclick = () => {
   mediaRecorder.stop();
   stopBtn.disabled = true;
 };
-
-// Reproduzir
+// Ouvir
 playBtn.onclick = () => {
   const audio = new Audio(audioUrl);
   audio.play();
 };
-
 // Enviar áudio
 sendAudioBtn.onclick = () => {
   const reader = new FileReader();
@@ -101,8 +96,7 @@ sendAudioBtn.onclick = () => {
   };
   reader.readAsDataURL(audioBlob);
 };
-
-// Cancelar
+// Cancelar envio
 cancelAudioBtn.onclick = () => {
   audioModal.hidden = true;
   if (mediaRecorder && mediaRecorder.state !== 'inactive') {
@@ -110,4 +104,4 @@ cancelAudioBtn.onclick = () => {
   }
 };
 
-// ... restante do seu código original ...
+// ... (outro código do chat permanece igual) ...

@@ -12,37 +12,32 @@
     <h1>MMChat</h1>
     <button id="logoutBtn">Sair</button>
   </header>
-
   <main class="chat-container">
     <section id="chat-mural" class="chat-mural"></section>
-
     <div class="chat-input-area">
       <input type="text" id="mensagemInput" placeholder="Digite sua mensagem…" />
       <button id="enviarBtn">Enviar</button>
     </div>
-
     <div class="chat-tools">
       <button id="imgBtn" title="Enviar imagem">📷</button>
-      <button id="audioBtn" title="Gravar áudio">🎙️</button>
+      <button id="audioBtn" title="Gravar áudio">🎤</button>
       <button id="usuariosBtn" title="Usuários online">👥</button>
       <button id="configBtn" title="Configurações">⚙️</button>
     </div>
   </main>
-
   <!-- Painel de usuários online -->
   <aside id="usuariosOnline" class="usuarios-sidebar">
-    <div class="sidebar-header" style="display:flex;justify-content:space-between;align-items:center;">
+    <div class="sidebar-header">
       <h3>Usuários Online</h3>
-      <button id="fecharUsuarios" class="sidebar-close" title="Fechar painel">✖️</button>
+      <button id="fecharUsuarios" class="sidebar-close">✖️</button>
     </div>
     <ul id="listaUsuarios"></ul>
   </aside>
-
   <!-- Painel de configurações -->
   <aside id="configPainel" class="config-sidebar">
-    <div class="sidebar-header" style="display:flex;justify-content:space-between;align-items:center;">
+    <div class="sidebar-header">
       <h3>⚙️ Configurações</h3>
-      <button id="fecharConfig" class="sidebar-close" title="Fechar painel">✖️</button>
+      <button id="fecharConfig" class="sidebar-close">✖️</button>
     </div>
     <label>Cor da fonte:
       <input type="color" id="corFonte" />
@@ -62,7 +57,6 @@
       Gradiente no nick (Premium)
     </label>
   </aside>
-
   <!-- Modal Gravação de Áudio -->
   <div id="audioModal" class="audio-modal" hidden>
     <button id="recordBtn">Gravar</button>
@@ -71,7 +65,6 @@
     <button id="sendAudioBtn" disabled>Enviar</button>
     <button id="cancelAudioBtn">Cancelar</button>
   </div>
-
   <script type="module" src="chat_corrigido.js" defer></script>
 </body>
 </html>
