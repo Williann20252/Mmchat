@@ -12,6 +12,7 @@
     <h1>MMChat</h1>
     <button id="logoutBtn">Sair</button>
   </header>
+
   <main class="chat-container">
     <section id="chat-mural" class="chat-mural"></section>
     <div class="chat-input-area">
@@ -25,7 +26,7 @@
       <button id="configBtn" title="Configurações">⚙️</button>
     </div>
   </main>
-  <!-- Painel de usuários online -->
+
   <aside id="usuariosOnline" class="usuarios-sidebar">
     <div class="sidebar-header">
       <h3>Usuários Online</h3>
@@ -33,7 +34,7 @@
     </div>
     <ul id="listaUsuarios"></ul>
   </aside>
-  <!-- Painel de configurações -->
+
   <aside id="configPainel" class="config-sidebar">
     <div class="sidebar-header">
       <h3>⚙️ Configurações</h3>
@@ -41,30 +42,26 @@
     </div>
     <label>Cor da fonte:
       <input type="color" id="corFonte" />
-    </label>
-    <br /><br />
+    </label><br/><br/>
     <label>Cor do nick:
       <input type="color" id="corNick" />
-    </label>
-    <br /><br />
-    <label>
-      <input type="checkbox" id="rolagemAuto" checked />
-      Rolagem automática
-    </label>
-    <br /><br />
-    <label>
-      <input type="checkbox" id="gradienteNick" />
-      Gradiente no nick (Premium)
-    </label>
+    </label><br/><br/>
+    <label><input type="checkbox" id="rolagemAuto" checked /> Rolagem automática</label><br/><br/>
+    <label><input type="checkbox" id="gradienteNick" /> Gradiente no nick (Premium)</label>
   </aside>
+
   <!-- Modal Gravação de Áudio -->
   <div id="audioModal" class="audio-modal" hidden>
-    <button id="recordBtn">Gravar</button>
-    <button id="stopBtn" disabled>Parar</button>
-    <button id="playBtn" disabled>Ouvir</button>
-    <button id="sendAudioBtn" disabled>Enviar</button>
-    <button id="cancelAudioBtn">Cancelar</button>
+    <div class="audio-modal-bg"></div>
+    <div class="audio-modal-content">
+      <button id="recordBtn">Gravar</button>
+      <button id="stopBtn" disabled>Parar</button>
+      <button id="playBtn" disabled>Ouvir</button>
+      <button id="sendAudioBtn" disabled>Enviar</button>
+      <button id="cancelAudioBtn">Cancelar</button>
+    </div>
   </div>
+
   <script type="module" src="chat_corrigido.js" defer></script>
 </body>
 </html>
