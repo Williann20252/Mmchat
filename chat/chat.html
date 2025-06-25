@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MMChat – Sala Geral</title>
-  <link rel="stylesheet" href="chat.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="chat.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+        rel="stylesheet"/>
 </head>
 <body>
   <header class="chat-header">
@@ -14,13 +15,8 @@
   </header>
 
   <main class="chat-container">
-    <!-- botão “descer” quando houver novas mensagens -->
-    <button id="scrollToBottom" class="scroll-to-bottom" hidden>↓ Novas mensagens</button>
-
-    <!-- mural de mensagens -->
     <section id="chat-mural" class="chat-mural"></section>
 
-    <!-- área de entrada de mensagem -->
     <div class="chat-input-area">
       <select id="modeSelect">
         <option value="sala">Sala</option>
@@ -29,20 +25,12 @@
       <select id="mentionUserSelect" hidden>
         <option value="" disabled selected>Selecione usuário</option>
       </select>
-      <input type="text" id="mensagemInput" placeholder="Digite sua mensagem…" />
+
+      <input type="text" id="mensagemInput" placeholder="Digite sua mensagem…"/>
       <button id="emojiBtn" title="Inserir emoji">😊</button>
       <button id="enviarBtn">Enviar</button>
-
-      <div id="emojiPicker" class="emoji-picker" hidden>
-        <span class="emoji">😀</span>
-        <span class="emoji">😂</span>
-        <span class="emoji">😍</span>
-        <span class="emoji">👍</span>
-        <span class="emoji">🎉</span>
-      </div>
     </div>
 
-    <!-- ferramentas adicionais -->
     <div class="chat-tools">
       <button id="imgBtn"        title="Enviar imagem">📷</button>
       <button id="audioBtn"      title="Gravar áudio">🎤</button>
@@ -52,17 +40,8 @@
       <button id="configBtn"     title="Configurações">⚙️</button>
     </div>
 
-    <!-- template de item de usuário -->
-    <template id="userItemTemplate">
-      <li>
-        <span class="user-name"></span>
-        <button class="invite-moita" title="Convidar para moita">🌿</button>
-        <button class="block-user"   title="Bloquear usuário">🚫</button>
-      </li>
-    </template>
-
-    <!-- painel de usuários online -->
-    <aside id="usuariosOnline" class="usuarios-sidebar">
+    <!-- Painéis flutuantes -->
+    <aside id="usuariosOnline" class="usuarios-sidebar" hidden>
       <div class="sidebar-header">
         <h3>Usuários Online</h3>
         <button id="fecharUsuarios" class="sidebar-close">✖️</button>
@@ -70,42 +49,16 @@
       <ul id="listaUsuarios"></ul>
     </aside>
 
-    <!-- template de convite PV -->
-    <template id="pvInviteTemplate">
-      <div class="msg-pv">
-        <strong>@<span class="invite-from"></span></strong> deseja conversar reservadamente.
-        <button class="pv-aceitar">Aceitar</button>
-        <button class="pv-recusar">Recusar</button>
-      </div>
-    </template>
-
-    <!-- painel de configurações -->
-    <aside id="configPainel" class="config-sidebar">
+    <aside id="configPainel" class="config-sidebar" hidden>
       <div class="sidebar-header">
         <h3>⚙️ Configurações</h3>
         <button id="fecharConfig" class="sidebar-close">✖️</button>
       </div>
-      <label>Cor da fonte:
-        <input type="color" id="corFonte" />
-      </label>
-      <br/><br/>
-      <label>Cor do nick:
-        <input type="color" id="corNick" />
-      </label>
-      <br/><br/>
-      <label>
-        <input type="checkbox" id="rolagemAuto" checked />
-        Rolagem automática
-      </label>
-      <br/><br/>
-      <label>
-        <input type="checkbox" id="gradienteNick" />
-        Gradiente no nick (Premium)
-      </label>
+      <!-- ... seus controles ... -->
     </aside>
 
-    <!-- modal de gravação de áudio -->
-    <div id="audioModal" class="pv-modal">
+    <!-- Modal de gravação de áudio, inicialmente hidden -->
+    <div id="audioModal" class="pv-modal" hidden>
       <h3>Gravar Áudio</h3>
       <button id="recordBtn">Gravar</button>
       <button id="stopBtn" disabled>Parar</button>
@@ -117,4 +70,4 @@
 
   <script type="module" src="chat_corrigido.js" defer></script>
 </body>
-          </html>
+</html>
