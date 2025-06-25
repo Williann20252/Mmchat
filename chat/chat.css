@@ -1,63 +1,170 @@
 /* Reset básico */
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-{ margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
 
+.chat-header {
+  width: 100%;
+  padding: 1rem;
+  background: #112d4e;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  /* efeito 3D leve */
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
 
-body { font-family: 'Inter', sans-serif; background: linear-gradient(to right, #0f2027, #203a43, #2c5364); color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+.chat-header h1 {
+  font-size: 1.75rem;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
 
-.chat-header { width: 100%; padding: 1rem; background: #112d4e; display: flex; justify-content: space-between; align-items: center; color: #fff; }
+.chat-header button {
+  background: #f67280;
+  border: none;
+  padding: .5rem 1rem;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+}
 
-.chat-header h1 { font-size: 1.5rem; font-weight: 600; }
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 600px;
+  flex-grow: 1;
+  padding: 1rem;
+}
 
-.chat-header button { background: #f67280; border: none; padding: .5rem 1rem; color: #fff; border-radius: 8px; cursor: pointer; }
+.chat-mural {
+  background: #fff;
+  color: #333;
+  flex-grow: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  height: 60vh;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  position: relative;
+}
 
-.chat-container { display: flex; flex-direction: column; width: 100%; max-width: 600px; flex-grow: 1; padding: 1rem; }
+/* Input e botões */
+.chat-input-area {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: 1rem;
+}
+.chat-input-area select,
+.chat-input-area input {
+  padding: .75rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+.chat-input-area button {
+  padding: .75rem 1rem;
+  background: #4da8da;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.chat-tools {
+  display: flex;
+  justify-content: space-between;
+  padding: .5rem 0;
+}
+.chat-tools button {
+  background: #4da8da;
+  border: none;
+  padding: .6rem .8rem;
+  font-size: 1.2rem;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  transition: background .3s;
+}
+.chat-tools button:hover {
+  background: #3b8dbd;
+}
 
-.chat-mural { background: #fff; color: #333; flex-grow: 1; padding: 1rem; overflow-y: auto; height: 60vh; border-radius: 8px; margin-bottom: 1rem; position: relative; }
+/* Painéis flutuantes */
+.usuarios-sidebar,
+.config-sidebar,
+.pv-modal {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 280px;
+  max-height: 60vh;
+  overflow-y: auto;
+  background:
+    linear-gradient(rgba(17,45,78,0.85), rgba(17,45,78,0.95)),
+    url('https://www.transparenttextures.com/patterns/asfalt-dark.png');
+  background-blend-mode: overlay;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: none;
+}
+.usuarios-sidebar { right: 3%; }
+.config-sidebar  { left: 3%; }
+.pv-modal        { left: 50%; transform: translate(-50%,-50%); }
 
-.chat-input-area { display: flex; gap: .5rem; margin-bottom: 1rem; }
+.usuarios-sidebar.show,
+.config-sidebar.show,
+.pv-modal.show {
+  display: block;
+}
 
-.chat-input-area input { flex-grow: 1; padding: .75rem; border-radius: 6px; border: none; }
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding-bottom: .5rem;
+}
+.sidebar-close {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
 
-.chat-input-area button { padding: .75rem 1rem; background: #4da8da; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+/* Menções e animações */
+.mention {
+  background: linear-gradient(90deg, #ffeb3b, #ffc107);
+  padding: 0 .2rem;
+  border-radius: 3px;
+  color: #000;
+}
+@keyframes newMsg {
+  from { background: rgba(77,168,218,0.3); }
+  to   { background: transparent; }
+}
+.msg-new {
+  animation: newMsg 1s ease-out;
+}
 
-.chat-tools { display: flex; justify-content: space-between; padding: .5rem 0; }
-
-.chat-tools button { background: #4da8da; border: none; padding: .6rem .8rem; font-size: 1.2rem; border-radius: 6px; color: #fff; cursor: pointer; transition: background .3s; }
-
-.chat-tools button:hover { background: #3b8dbd; }
-
-/* ------------------------------------------ DROPDOWN TOOL-ITEM REMOVIDO Movido para painéis flutuantes abaixo ------------------------------------------ */
-
-/* Painel flutuante de Usuários Online */ .usuarios-sidebar { position: fixed; top: 50%; right: 3%; transform: translateY(-50%); width: 280px; max-height: 60vh; overflow-y: auto; background: linear-gradient(rgba(17, 45, 78, 0.85), rgba(17, 45, 78, 0.95)), url('https://www.transparenttextures.com/patterns/asfalt-dark.png'); background-blend-mode: overlay; padding: 1.5rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); backdrop-filter: blur(6px); z-index: 1000; display: none; }
-
-.usuarios-sidebar.show { display: block; }
-
-/* Painel flutuante de Configurações (opcional) */ .config-sidebar { position: fixed; top: 50%; left: 3%; transform: translateY(-50%); width: 280px; max-height: 60vh; overflow-y: auto; background: linear-gradient(rgba(17, 45, 78, 0.85), rgba(17, 45, 78, 0.95)), url('https://www.transparenttextures.com/patterns/asfalt-dark.png'); background-blend-mode: overlay; padding: 1.5rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); backdrop-filter: blur(6px); z-index: 1000; display: none; }
-
-.config-sidebar.show { display: block; }
-
-.sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.2); padding-bottom: .5rem; }
-
-.sidebar-close { background: transparent; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; }
-
-/* Destaque de menção */ .mention { background: linear-gradient(90deg, #ffeb3b, #ffc107); padding: 0 .2rem; border-radius: 3px; color: #000; }
-
-/* Animação de nova mensagem */ @keyframes newMsg { from { background: rgba(77,168,218,0.3); } to   { background: transparent; } }
-
-.msg-new { animation: newMsg 1s ease-out; }
-
-/* ---------------------------- YouTube Player / Áudio-only ---------------------------- */ .youtube-player-container { position: relative; margin-top: 1rem; width: 100%; max-width: 600px; transition: width .3s, height .3s; background: #000; border-radius: 8px; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
-
-.youtube-player-container iframe { display: block; }
-
-.minimize-btn { position: absolute; top: .5rem; right: .5rem; background: rgba(0,0,0,0.5); border: none; color: #fff; font-size: 1.2rem; padding: .3rem; border-radius: 4px; cursor: pointer; z-index: 2; }
-
-.youtube-player-container.minimized { width: 200px; height: 50px; }
-
-.youtube-player-container.minimized iframe { display: none; }
-
-.youtube-player-container.minimized { background: rgba(0, 0, 0, 0.8); }
-
-@media(max-width: 600px) { .usuarios-sidebar, .config-sidebar { width: 95%; right: 2%; left: auto; } }
-
+@media(max-width:600px){
+  .usuarios-sidebar,
+  .config-sidebar,
+  .pv-modal {
+    width: 95%;
+    right:2%; left:auto;
+  }
+}
