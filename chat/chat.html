@@ -18,10 +18,12 @@
     <section id="chat-mural" class="chat-mural"></section>
 
     <div class="chat-input-area">
+      <!-- Modo de envio: Sala geral ou Moita -->
       <select id="modeSelect">
         <option value="sala">Sala</option>
         <option value="moita">Moita</option>
       </select>
+      <!-- Seleção de usuário para Moita -->
       <select id="mentionUserSelect" hidden>
         <option value="" disabled selected>Selecione usuário</option>
       </select>
@@ -34,13 +36,13 @@
     <div class="chat-tools">
       <button id="imgBtn"        title="Enviar imagem">📷</button>
       <button id="audioBtn"      title="Gravar áudio">🎤</button>
-      <button id="uploadAudioBtn"title="Enviar áudio">🎵</button>
+      <button id="uploadAudioBtn" title="Enviar áudio">🎵</button>
       <button id="toggleScrollBtn" title="Alternar rolagem automática">🔄</button>
       <button id="usuariosBtn"   title="Usuários online">👥</button>
       <button id="configBtn"     title="Configurações">⚙️</button>
     </div>
 
-    <!-- Painéis flutuantes -->
+    <!-- Painel Usuários Online -->
     <aside id="usuariosOnline" class="usuarios-sidebar" hidden>
       <div class="sidebar-header">
         <h3>Usuários Online</h3>
@@ -49,15 +51,30 @@
       <ul id="listaUsuarios"></ul>
     </aside>
 
+    <!-- Painel Configurações -->
     <aside id="configPainel" class="config-sidebar" hidden>
       <div class="sidebar-header">
         <h3>⚙️ Configurações</h3>
         <button id="fecharConfig" class="sidebar-close">✖️</button>
       </div>
-      <!-- ... seus controles ... -->
+      <!-- aqui você pode colocar controles extras -->
+      <label>Cor da fonte:
+        <input type="color" id="corFonte"/>
+      </label><br/><br/>
+      <label>Cor do nick:
+        <input type="color" id="corNick"/>
+      </label><br/><br/>
+      <label>
+        <input type="checkbox" id="rolagemAuto" checked/>
+        Rolagem automática
+      </label><br/><br/>
+      <label>
+        <input type="checkbox" id="gradienteNick"/>
+        Gradiente no nick
+      </label>
     </aside>
 
-    <!-- Modal de gravação de áudio, inicialmente hidden -->
+    <!-- Modal de gravação de áudio -->
     <div id="audioModal" class="pv-modal" hidden>
       <h3>Gravar Áudio</h3>
       <button id="recordBtn">Gravar</button>
