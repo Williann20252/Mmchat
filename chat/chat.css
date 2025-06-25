@@ -1,6 +1,5 @@
 /* Reset básico */
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
 body {
   font-family: 'Inter', sans-serif;
   background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
@@ -10,7 +9,6 @@ body {
   align-items: center;
   min-height: 100vh;
 }
-
 .chat-header {
   width: 100%;
   padding: 1rem;
@@ -19,15 +17,12 @@ body {
   justify-content: space-between;
   align-items: center;
   color: #fff;
-  /* efeito 3D leve */
   box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
-
 .chat-header h1 {
   font-size: 1.75rem;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
-
 .chat-header button {
   background: #f67280;
   border: none;
@@ -36,7 +31,6 @@ body {
   border-radius: 8px;
   cursor: pointer;
 }
-
 .chat-container {
   display: flex;
   flex-direction: column;
@@ -45,7 +39,6 @@ body {
   flex-grow: 1;
   padding: 1rem;
 }
-
 .chat-mural {
   background: #fff;
   color: #333;
@@ -57,8 +50,6 @@ body {
   margin-bottom: 1rem;
   position: relative;
 }
-
-/* Input e botões */
 .chat-input-area {
   display: flex;
   gap: .5rem;
@@ -97,8 +88,6 @@ body {
 .chat-tools button:hover {
   background: #3b8dbd;
 }
-
-/* Painéis flutuantes */
 .usuarios-sidebar,
 .config-sidebar,
 .pv-modal {
@@ -122,13 +111,11 @@ body {
 .usuarios-sidebar { right: 3%; }
 .config-sidebar  { left: 3%; }
 .pv-modal        { left: 50%; transform: translate(-50%,-50%); }
-
 .usuarios-sidebar.show,
 .config-sidebar.show,
 .pv-modal.show {
   display: block;
 }
-
 .sidebar-header {
   display: flex;
   justify-content: space-between;
@@ -144,8 +131,6 @@ body {
   font-size: 1.2rem;
   cursor: pointer;
 }
-
-/* Menções e animações */
 .mention {
   background: linear-gradient(90deg, #ffeb3b, #ffc107);
   padding: 0 .2rem;
@@ -159,7 +144,6 @@ body {
 .msg-new {
   animation: newMsg 1s ease-out;
 }
-
 @media(max-width:600px){
   .usuarios-sidebar,
   .config-sidebar,

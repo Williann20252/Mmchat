@@ -5,34 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MMChat – Sala Geral</title>
   <link rel="stylesheet" href="chat.css"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
-        rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
   <header class="chat-header">
     <h1>MMChat</h1>
     <button id="logoutBtn">Sair</button>
   </header>
-
   <main class="chat-container">
     <section id="chat-mural" class="chat-mural"></section>
-
     <div class="chat-input-area">
-      <!-- Modo de envio: Sala geral ou Moita -->
       <select id="modeSelect">
         <option value="sala">Sala</option>
         <option value="moita">Moita</option>
       </select>
-      <!-- Seleção de usuário para Moita -->
       <select id="mentionUserSelect" hidden>
         <option value="" disabled selected>Selecione usuário</option>
       </select>
-
       <input type="text" id="mensagemInput" placeholder="Digite sua mensagem…"/>
       <button id="emojiBtn" title="Inserir emoji">😊</button>
       <button id="enviarBtn">Enviar</button>
     </div>
-
     <div class="chat-tools">
       <button id="imgBtn"        title="Enviar imagem">📷</button>
       <button id="audioBtn"      title="Gravar áudio">🎤</button>
@@ -41,8 +34,6 @@
       <button id="usuariosBtn"   title="Usuários online">👥</button>
       <button id="configBtn"     title="Configurações">⚙️</button>
     </div>
-
-    <!-- Painel Usuários Online -->
     <aside id="usuariosOnline" class="usuarios-sidebar" hidden>
       <div class="sidebar-header">
         <h3>Usuários Online</h3>
@@ -50,14 +41,11 @@
       </div>
       <ul id="listaUsuarios"></ul>
     </aside>
-
-    <!-- Painel Configurações -->
     <aside id="configPainel" class="config-sidebar" hidden>
       <div class="sidebar-header">
         <h3>⚙️ Configurações</h3>
         <button id="fecharConfig" class="sidebar-close">✖️</button>
       </div>
-      <!-- aqui você pode colocar controles extras -->
       <label>Cor da fonte:
         <input type="color" id="corFonte"/>
       </label><br/><br/>
@@ -73,8 +61,6 @@
         Gradiente no nick
       </label>
     </aside>
-
-    <!-- Modal de gravação de áudio -->
     <div id="audioModal" class="pv-modal" hidden>
       <h3>Gravar Áudio</h3>
       <button id="recordBtn">Gravar</button>
@@ -84,7 +70,6 @@
       <button id="cancelAudioBtn">Cancelar</button>
     </div>
   </main>
-
   <script type="module" src="chat_corrigido.js" defer></script>
 </body>
 </html>
