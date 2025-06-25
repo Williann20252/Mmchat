@@ -1,40 +1,94 @@
-<!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MMChat – Sala Geral</title>
   <link rel="stylesheet" href="chat.css"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+        rel="stylesheet"/>
 </head>
 <body>
   <header class="chat-header">
     <h1>MMChat</h1>
     <button id="logoutBtn">Sair</button>
-  </header>  <main class="chat-container">
-    <section id="chat-mural" class="chat-mural"></section><div class="chat-input-area">
-  <input type="text" id="mensagemInput" placeholder="Digite sua mensagem…"/>
-  <button id="enviarBtn">Enviar</button>
-</div>
+  </header>
 
-<div class="chat-tools">
-  <button id="imgBtn"        title="Enviar imagem">📷</button>
-  <button id="audioBtn"      title="Gravar áudio">🎤</button>
-  <button id="uploadAudioBtn" title="Enviar áudio">🎵</button>
-  <button id="usuariosBtn"   title="Usuários online">👥</button>
-  <button id="configBtn"     title="Configurações">⚙️</button>
+  <main class="chat-container">
+    <!-- Botão “Voltar ao fim” -->
+    <button id="scrollToBottom" class="scroll-to-bottom" hidden>↓ Novas mensagens</button>
 
-  <div class="tool-item">
-    <aside id="usuariosOnline" class="usuarios-sidebar">
+    <!-- Área de mensagens -->
+    <section id="chat-mural" class="chat-mural"></section>
+
+    <!-- Campo de entrada + picker de emoji + modo Sala/Moita -->
+    <div class="chat-input-area">
+      <!-- Modo de envio: Sala ou Moita (reservado) -->
+      <select id="modeSelect">
+        <option value="sala">Sala</option>
+        <option value="moita">Moita</option>
+      </select>
+      <!-- Seleção de usuário para Moita -->
+      <select id="mentionUserSelect" hidden>
+        <option value="" disabled selected>Selecione usuário</option>
+      </select>
+
+      <input type="text" id="mensagemInput" placeholder="Digite sua mensagem…"/>
+      <button id="emojiBtn" title="Inserir emoji">😊</button>
+      <button id="enviarBtn">Enviar</button>
+
+      <div id="emojiPicker" class="emoji-picker" hidden>
+        <span class="emoji">😀</span>
+        <span class="emoji">😂</span>
+        <span class="emoji">😍</span>
+        <span class="emoji">👍</span>
+        <span class="emoji">🎉</span>
+      </div>
+    </div>
+
+    <!-- Ferramentas adicionais -->
+    <div class="chat-tools">
+      <button id="imgBtn"        title="Enviar imagem">📷</button>
+      <button id="audioBtn"      title="Gravar áudio">🎤</button>
+      <button id="uploadAudioBtn"title="Enviar áudio">🎵</button>
+      <button id="toggleScrollBtn" title="Alternar rolagem automática">🔄</button>
+      <button id="usuariosBtn"   title="Usuários online">👥</button>
+      <button id="configBtn"     title="Configurações">⚙️</button>
+    </div>
+
+    <!-- Template para item de usuário no painel -->
+    <template id="userItemTemplate">
+      <li class="user-item">
+        <span class="user-name"></span>
+        <button class="invite-moita" title="Convidar para moita">🌿</button>
+        <button class="block-user"   title="Bloquear usuário">🚫</button>
+      </li>
+    </template>
+
+    <!-- Painel de Usuários Online -->
+    <aside id="usuariosOnline" class="usuarios-sidebar" hidden>
       <div class="sidebar-header">
         <h3>Usuários Online</h3>
         <button id="fecharUsuarios" class="sidebar-close">✖️</button>
       </div>
       <ul id="listaUsuarios"></ul>
     </aside>
-  </div>
 
-  <div class="tool-item">
-    <aside id="configPainel" class="config-sidebar">
+    <!-- Template de convite PV (Moita) -->
+    <template id="pvInviteTemplate">
+      <div class="msg-pv-invite">
+        <span>Oi, eu sou </span>
+        <strong>@<span class="invite-from"></span></strong>
+        <span>, gostaria de te levar para moita 😏</span>
+        <div class="pv-buttons">
+          <button class="acceptPv">Aceitar</button>
+          <button class="rejectPv">Recusar</button>
+        </div>
+      </div>
+    </template>
+
+    <!-- Painel de Configurações -->
+    <aside id="configPainel" class="config-sidebar" hidden>
       <div class="sidebar-header">
         <h3>⚙️ Configurações</h3>
         <button id="fecharConfig" class="sidebar-close">✖️</button>
@@ -54,22 +108,23 @@
         Gradiente no nick
       </label>
     </aside>
-  </div>
-</div>
 
-<!-- Player de YouTube com minimize -->
-<div id="youtube-player-container" class="youtube-player-container">
-  <button id="minimizePlayerBtn" class="minimize-btn" title="Ouvir só áudio">🔉</button>
-  <iframe
-    id="youtube-player"
-    width="100%"
-    height="400px"
-    src=""
-    frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen>
-  </iframe>
-</div>
+    <!-- Player de YouTube com minimize -->
+    <div id="youtube-player-container" class="youtube-player-container">
+      <button id="minimizePlayerBtn" class="minimize-btn" title="Ouvir só áudio">🔉</button>
+      <iframe
+        id="youtube-player"
+        width="100%"
+        height="400px"
+        src=""
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </main>
 
-  </main>  <script type="module" src="chat_corrigido.js" defer></script></body>
+  <!-- Lógica JavaScript -->
+  <script type="module" src="chat_corrigido.js" defer></script>
+</body>
 </html>
