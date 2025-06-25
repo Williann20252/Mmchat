@@ -9,7 +9,6 @@ window.addEventListener('error', e => {
   alert(`Erro: ${e.message}`);
 });
 
-// Só rodar depois que o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
   // — Configuração do Firebase
   const firebaseConfig = {
@@ -21,23 +20,23 @@ document.addEventListener('DOMContentLoaded', () => {
     messagingSenderId: "404598754438",
     appId: "1:404598754438:web:6a0892890d851507"
   };
-  const app = initializeApp(firebaseConfig);
-  const db  = getDatabase(app);
+  initializeApp(firebaseConfig);
+  const db = getDatabase();
 
   // — Identidade do usuário
   const nickname = localStorage.getItem("nickname") || "Anônimo";
-  let   uid      = localStorage.getItem("uid");
+  let uid = localStorage.getItem("uid");
   if (!uid) {
-    uid = "user_"+Math.random().toString(36).substr(2,8);
+    uid = "user_" + Math.random().toString(36).substr(2, 8);
     localStorage.setItem("uid", uid);
   }
 
-  // — Registro de presença
+  // — Presença
   const userRef = ref(db, `onlineUsers/${uid}`);
   set(userRef, nickname);
   window.addEventListener("beforeunload", () => remove(userRef));
 
-  // — DOM refs
+  // — Referências DOM
   const mural             = document.getElementById("chat-mural");
   const input             = document.getElementById("mensagemInput");
   const enviarBtn         = document.getElementById("enviarBtn");
@@ -62,234 +61,261 @@ document.addEventListener('DOMContentLoaded', () => {
   const sendAudioBtn      = document.getElementById("sendAudioBtn");
   const cancelAudioBtn    = document.getElementById("cancelAudioBtn");
 
-  let mediaRecorder, audioChunks, audioBlob, audioUrl;
+  const log = (...args) => console.log("[MMChat]", ...args);
 
   // — Toggle painéis
-  usuariosBtn.onclick    = () => painelUsuarios.classList.toggle("show");
-  fecharUsuarios.onclick = () => painelUsuarios.classList.remove("show");
-  configBtn.onclick      = () => painelConfig.classList.toggle("show");
-  fecharConfig.onclick   = () => painelConfig.classList.remove("show");
+  if (usuariosBtn && painelUsuarios) {
+    usuariosBtn.onclick = () => painelUsuarios.classList.toggle("show");
+  }
+  if (fecharUsuarios && painelUsuarios) {
+    fecharUsuarios.onclick = () => painelUsuarios.classList.remove("show");
+  }
+  if (configBtn && painelConfig) {
+    configBtn.onclick = () => painelConfig.classList.toggle("show");
+  }
+  if (fecharConfig && painelConfig) {
+    fecharConfig.onclick = () => painelConfig.classList.remove("show");
+  }
 
   // — Mostrar select de Moita
-  modeSelect.addEventListener("change", () => {
-    mentionUserSelect.hidden = modeSelect.value !== "moita";
-  });
-
-  // — Popula lista de usuários e opções “Moita”
-  onValue(ref(db, "onlineUsers"), snap => {
-    listaUsuarios.innerHTML = "";
-    mentionUserSelect.innerHTML = '<option value="" disabled selected>Selecione usuário</option>';
-    const data = snap.val() || {};
-    Object.entries(data).forEach(([key, name]) => {
-      const li = document.createElement("li");
-      li.textContent = name;
-      if (key !== uid) {
-        // convite “moita”
-        const btnM = document.createElement("button");
-        btnM.textContent = "🌿";
-        btnM.title = "Convidar para moita";
-        btnM.onclick = () => requestMoita(key, name);
-        li.append(btnM);
-        // bloquear (placeholder)
-        const btnB = document.createElement("button");
-        btnB.textContent = "🚫";
-        btnB.title = "Bloquear usuário";
-        li.append(btnB);
-        // select moita
-        const opt = document.createElement("option");
-        opt.value = key;
-        opt.textContent = name;
-        mentionUserSelect.append(opt);
-      }
-      listaUsuarios.append(li);
-    });
-  });
-
-  // — Solicita Moita (PV)
-  function requestMoita(destUid, destNick) {
-    push(ref(db, "pvSolicitacoes"), {
-      deUid: uid,
-      deNick: nickname,
-      paraUid: destUid,
-      paraNick: destNick,
-      status: "pendente"
+  if (modeSelect && mentionUserSelect) {
+    modeSelect.addEventListener("change", () => {
+      mentionUserSelect.hidden = (modeSelect.value !== "moita");
     });
   }
 
-  // — Recebe convites PV
-  onChildAdded(ref(db, "pvSolicitacoes"), snap => {
-    const s = snap.val();
-    if (s.paraUid === uid && s.status === "pendente") {
+  // — Popula lista de usuários / opções de Moita
+  if (listaUsuarios && mentionUserSelect) {
+    onValue(ref(db, "onlineUsers"), snap => {
+      listaUsuarios.innerHTML = "";
+      mentionUserSelect.innerHTML = '<option disabled selected>Selecione usuário</option>';
+      const data = snap.val() || {};
+      Object.entries(data).forEach(([key, name]) => {
+        const li = document.createElement("li");
+        li.textContent = name;
+        if (key !== uid) {
+          const btnM = document.createElement("button");
+          btnM.textContent = "🌿";
+          btnM.title = "Convidar para moita";
+          btnM.onclick = () => push(ref(db, "pvSolicitacoes"), {
+            deUid: uid, deNick: nickname,
+            paraUid: key, paraNick: name,
+            status: "pendente"
+          });
+          li.append(btnM);
+
+          const btnB = document.createElement("button");
+          btnB.textContent = "🚫";
+          btnB.title = "Bloquear usuário";
+          li.append(btnB);
+
+          const opt = document.createElement("option");
+          opt.value = key; opt.textContent = name;
+          mentionUserSelect.append(opt);
+        }
+        listaUsuarios.append(li);
+      });
+    });
+  }
+
+  // — Recebimento de convites PV
+  if (mural) {
+    onChildAdded(ref(db, "pvSolicitacoes"), snap => {
+      const s = snap.val();
+      if (s.paraUid === uid && s.status === "pendente") {
+        const div = document.createElement("div");
+        div.className = "msg-pv";
+        div.innerHTML = `
+          <strong>@${s.deNick}</strong> quer moita.
+          <button class="aceitarPV" data-id="${snap.key}">Aceitar</button>
+          <button class="recusarPV" data-id="${snap.key}">Recusar</button>
+        `;
+        mural.append(div);
+      }
+    });
+
+    document.addEventListener("click", e => {
+      const key = e.target.dataset?.id;
+      if (!key) return;
+      if (e.target.classList.contains("aceitarPV")) {
+        update(ref(db, `pvSolicitacoes/${key}`), { status: "aceito" });
+      }
+      if (e.target.classList.contains("recusarPV")) {
+        update(ref(db, `pvSolicitacoes/${key}`), { status: "recusado" });
+      }
+    });
+  }
+
+  // — Envio com Enter / clique
+  if (input && enviarBtn) {
+    const enviarMensagem = () => {
+      const texto = input.value.trim();
+      if (!texto) return;
+      const payload = {
+        nick: nickname, uid,
+        conteudo: texto,
+        hora: Date.now()
+      };
+      if (modeSelect?.value === "moita") {
+        const dest = mentionUserSelect?.value;
+        if (!dest) { alert("Selecione usuário para moita."); return; }
+        payload.tipo = "moita";
+        payload.privadoPara = dest;
+      } else {
+        payload.tipo = "texto";
+      }
+      push(ref(db, "mensagens"), payload);
+      input.value = "";
+    };
+
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") enviarMensagem();
+    });
+    enviarBtn.onclick = enviarMensagem;
+  }
+
+  // — Renderização de mensagens
+  if (mural) {
+    onChildAdded(ref(db, "mensagens"), snap => {
+      const msg = snap.val();
+      // filtro
+      if (modeSelect?.value === "moita") {
+        if (msg.tipo !== "moita") return;
+        if (msg.uid !== uid && msg.privadoPara !== uid) return;
+      } else {
+        if (msg.tipo === "moita") return;
+      }
+
       const div = document.createElement("div");
-      div.className = "msg-pv";
-      div.innerHTML = `
-        <strong>@${s.deNick}</strong> quer moita.
-        <button class="aceitarPV" data-id="${snap.key}">Aceitar</button>
-        <button class="recusarPV" data-id="${snap.key}">Recusar</button>
-      `;
+      div.classList.add("msg-new");
+      const span = document.createElement("span");
+      span.style.fontWeight = "bold";
+      span.textContent = `@${msg.nick}: `;
+      div.append(span, document.createTextNode(msg.conteudo));
       mural.append(div);
-    }
-  });
 
-  document.addEventListener("click", e => {
-    const key = e.target.dataset.id;
-    if (e.target.classList.contains("aceitarPV")) {
-      update(ref(db, `pvSolicitacoes/${key}`), { status: "aceito" });
-    }
-    if (e.target.classList.contains("recusarPV")) {
-      update(ref(db, `pvSolicitacoes/${key}`), { status: "recusado" });
-    }
-  });
-
-  // — Envio com Enter
-  input.addEventListener("keydown", e => {
-    if (e.key === "Enter") enviarMensagem();
-  });
-  enviarBtn.onclick = enviarMensagem;
-
-  // — Enviar mensagem Sala/Moita
-  function enviarMensagem() {
-    const texto = input.value.trim();
-    if (!texto) return;
-
-    if (modeSelect.value === "moita") {
-      const dest = mentionUserSelect.value;
-      if (!dest) {
-        alert("Selecione usuário para moita.");
-        return;
+      if (document.getElementById("rolagemAuto")?.checked) {
+        mural.scrollTop = mural.scrollHeight;
       }
-      push(ref(db, "mensagens"), {
-        nick: nickname,
-        uid,
-        tipo: "moita",
-        privadoPara: dest,
-        conteudo: texto,
-        hora: Date.now()
-      });
-    } else {
-      push(ref(db, "mensagens"), {
-        nick: nickname,
-        uid,
-        tipo: "texto",
-        conteudo: texto,
-        hora: Date.now()
-      });
-    }
-    input.value = "";
+    });
   }
-
-  // — Renderização com filtro
-  onChildAdded(ref(db, "mensagens"), snap => {
-    const msg = snap.val();
-    // filtro por modo
-    if (modeSelect.value === "moita") {
-      if (msg.tipo !== "moita") return;
-      if (msg.uid !== uid && msg.privadoPara !== uid) return;
-    } else {
-      if (msg.tipo === "moita") return;
-    }
-    // monta
-    const div = document.createElement("div");
-    div.classList.add("msg-new");
-    const span = document.createElement("span");
-    span.style.fontWeight = "bold";
-    span.textContent = `@${msg.nick}: `;
-    div.append(span, document.createTextNode(msg.conteudo));
-    mural.append(div);
-    if (document.getElementById("rolagemAuto")?.checked) {
-      mural.scrollTop = mural.scrollHeight;
-    }
-  });
 
   // — Envio de imagem
-  imgBtn.onclick = () => {
-    const fi = document.createElement("input");
-    fi.type = "file";
-    fi.accept = "image/*";
-    fi.onchange = () => {
-      const r = new FileReader();
-      r.onload = () => push(ref(db, "mensagens"), {
-        nick: nickname, uid,
-        tipo: "img", conteudo: r.result,
-        hora: Date.now()
-      });
-      r.readAsDataURL(fi.files[0]);
+  if (imgBtn) {
+    imgBtn.onclick = () => {
+      const fi = document.createElement("input");
+      fi.type = "file"; fi.accept = "image/*";
+      fi.onchange = () => {
+        const r = new FileReader();
+        r.onload = () => push(ref(db, "mensagens"), {
+          nick: nickname, uid,
+          tipo: "img", conteudo: r.result,
+          hora: Date.now()
+        });
+        r.readAsDataURL(fi.files[0]);
+      };
+      fi.click();
     };
-    fi.click();
-  };
+  }
 
-  // — Gravação de áudio via modal
-  audioBtn.onclick = () => {
-    audioModal.hidden = false; audioModal.classList.add("show");
-    audioChunks = []; recordBtn.disabled = false;
-    stopBtn.disabled = playBtn.disabled = sendAudioBtn.disabled = true;
-  };
-  recordBtn.onclick = () => {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(stream => {
-        mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-        mediaRecorder.onstop = () => {
-          audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-          audioUrl = URL.createObjectURL(audioBlob);
-          playBtn.disabled = sendAudioBtn.disabled = false;
-        };
-        mediaRecorder.start();
-        recordBtn.disabled = true; stopBtn.disabled = false;
-      })
-      .catch(err => {
-        console.error("Erro no microfone:", err);
-        alert("Não foi possível acessar microfone.");
-      });
-  };
-  stopBtn.onclick = () => { mediaRecorder.stop(); stopBtn.disabled = true; };
-  playBtn.onclick = () => new Audio(audioUrl).play();
-  sendAudioBtn.onclick = () => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      push(ref(db, "mensagens"), {
-        nick: nickname, uid,
-        tipo: "audio", conteudo: reader.result,
-        hora: Date.now()
-      });
+  // — Modal de áudio
+  if (audioBtn && audioModal && recordBtn && stopBtn && playBtn && sendAudioBtn && cancelAudioBtn) {
+    let mediaRecorder, audioChunks, audioBlob, audioUrl;
+
+    audioBtn.onclick = () => {
+      audioModal.hidden = false; audioModal.classList.add("show");
+      audioChunks = [];
+      recordBtn.disabled = false;
+      stopBtn.disabled = playBtn.disabled = sendAudioBtn.disabled = true;
+    };
+
+    recordBtn.onclick = () => {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          mediaRecorder = new MediaRecorder(stream);
+          mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+          mediaRecorder.onstop = () => {
+            audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+            audioUrl  = URL.createObjectURL(audioBlob);
+            playBtn.disabled = sendAudioBtn.disabled = false;
+          };
+          mediaRecorder.start();
+          recordBtn.disabled = true;
+          stopBtn.disabled = false;
+        })
+        .catch(err => {
+          console.error("Erro no microfone:", err);
+          alert("Não foi possível acessar microfone.");
+        });
+    };
+
+    stopBtn.onclick = () => {
+      if (mediaRecorder) mediaRecorder.stop();
+      stopBtn.disabled = true;
+    };
+
+    playBtn.onclick = () => {
+      if (audioUrl) new Audio(audioUrl).play();
+    };
+
+    sendAudioBtn.onclick = () => {
+      if (!audioBlob) return;
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        push(ref(db, "mensagens"), {
+          nick: nickname, uid,
+          tipo: "audio", conteudo: reader.result,
+          hora: Date.now()
+        });
+        audioModal.hidden = true; audioModal.classList.remove("show");
+      };
+      reader.readAsDataURL(audioBlob);
+    };
+
+    cancelAudioBtn.onclick = () => {
       audioModal.hidden = true; audioModal.classList.remove("show");
+      if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop();
+      }
     };
-    reader.readAsDataURL(audioBlob);
-  };
-  cancelAudioBtn.onclick = () => {
-    audioModal.hidden = true; audioModal.classList.remove("show");
-    if (mediaRecorder?.state !== "inactive") mediaRecorder.stop();
-  };
-  audioModal.onclick = e => {
-    if (e.target === audioModal) cancelAudioBtn.onclick();
-  };
 
-  // — Upload de áudio pronto
-  uploadAudioBtn.onclick = () => {
-    const fi = document.createElement("input");
-    fi.type = "file"; fi.accept = "audio/*";
-    fi.onchange = () => {
-      const r = new FileReader();
-      r.onload = () => push(ref(db, "mensagens"), {
-        nick: nickname, uid,
-        tipo: "audio", conteudo: r.result,
-        hora: Date.now()
-      });
-      r.readAsDataURL(fi.files[0]);
+    audioModal.onclick = e => {
+      if (e.target === audioModal) cancelAudioBtn.onclick();
     };
-    fi.click();
-  };
+  }
+
+  // — Upload áudio existente
+  if (uploadAudioBtn) {
+    uploadAudioBtn.onclick = () => {
+      const fi = document.createElement("input");
+      fi.type = "file"; fi.accept = "audio/*";
+      fi.onchange = () => {
+        const r = new FileReader();
+        r.onload = () => push(ref(db, "mensagens"), {
+          nick: nickname, uid,
+          tipo: "audio", conteudo: r.result,
+          hora: Date.now()
+        });
+        r.readAsDataURL(fi.files[0]);
+      };
+      fi.click();
+    };
+  }
 
   // — Alternar rolagem automática
-  toggleScrollBtn.onclick = () => {
-    const chk = document.getElementById("rolagemAuto");
-    chk.checked = !chk.checked;
-  };
+  if (toggleScrollBtn) {
+    toggleScrollBtn.onclick = () => {
+      const chk = document.getElementById("rolagemAuto");
+      if (chk) chk.checked = !chk.checked;
+    };
+  }
 
   // — Logout
-  logoutBtn.onclick = () => {
-    remove(userRef);
-    localStorage.clear();
-    window.location.href = "index.html";
-  };
+  if (logoutBtn && userRef) {
+    logoutBtn.onclick = () => {
+      remove(userRef);
+      localStorage.clear();
+      window.location.href = "index.html";
+    };
+  }
 });
