@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     projectId: "mmchat-f4f88",
     storageBucket: "mmchat-f4f88.appspot.com",
     messagingSenderId: "404598754438",
-    appId: "1:404598754438:web:6a0892890d851507"
+    appId: "1:404598754438:web:60892890d851507"
   };
   initializeApp(firebaseConfig);
   const db = getDatabase();
@@ -61,8 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const sendAudioBtn      = document.getElementById("sendAudioBtn");
   const cancelAudioBtn    = document.getElementById("cancelAudioBtn");
 
-  const log = (...args) => console.log("[MMChat]", ...args);
-
   // — Toggle painéis
   if (usuariosBtn && painelUsuarios) {
     usuariosBtn.onclick = () => painelUsuarios.classList.toggle("show");
@@ -84,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // — Popula lista de usuários / opções de Moita
+  // — Popula usuários e Moita
   if (listaUsuarios && mentionUserSelect) {
     onValue(ref(db, "onlineUsers"), snap => {
       listaUsuarios.innerHTML = "";
@@ -118,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // — Recebimento de convites PV
+  // — Recebe convites PV
   if (mural) {
     onChildAdded(ref(db, "pvSolicitacoes"), snap => {
       const s = snap.val();
@@ -146,26 +144,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // — Envio com Enter / clique
+  // — Enviar mensagem
   if (input && enviarBtn) {
     const enviarMensagem = () => {
+      console.log("[Handler] enviarMensagem ▶ start");
       const texto = input.value.trim();
       if (!texto) return;
-      const payload = {
-        nick: nickname, uid,
-        conteudo: texto,
-        hora: Date.now()
-      };
+      const payload = { nick: nickname, uid, conteudo: texto, hora: Date.now() };
       if (modeSelect?.value === "moita") {
         const dest = mentionUserSelect?.value;
         if (!dest) { alert("Selecione usuário para moita."); return; }
-        payload.tipo = "moita";
-        payload.privadoPara = dest;
+        payload.tipo = "moita"; payload.privadoPara = dest;
       } else {
         payload.tipo = "texto";
       }
       push(ref(db, "mensagens"), payload);
       input.value = "";
+      console.log("[Handler] enviarMensagem ◼ end");
     };
 
     input.addEventListener("keydown", e => {
@@ -174,9 +169,10 @@ document.addEventListener('DOMContentLoaded', () => {
     enviarBtn.onclick = enviarMensagem;
   }
 
-  // — Renderização de mensagens
+  // — Renderizar mensagens
   if (mural) {
     onChildAdded(ref(db, "mensagens"), snap => {
+      console.log("[DB] onChildAdded ▶", snap.key, snap.val());
       const msg = snap.val();
       // filtro
       if (modeSelect?.value === "moita") {
@@ -185,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         if (msg.tipo === "moita") return;
       }
-
+      // monta
       const div = document.createElement("div");
       div.classList.add("msg-new");
       const span = document.createElement("span");
@@ -193,25 +189,28 @@ document.addEventListener('DOMContentLoaded', () => {
       span.textContent = `@${msg.nick}: `;
       div.append(span, document.createTextNode(msg.conteudo));
       mural.append(div);
-
       if (document.getElementById("rolagemAuto")?.checked) {
         mural.scrollTop = mural.scrollHeight;
       }
+      console.log("[DB] onChildAdded ◼ render ok");
     });
   }
 
   // — Envio de imagem
   if (imgBtn) {
     imgBtn.onclick = () => {
+      console.log("[Handler] imgBtn.onclick ▶ start");
       const fi = document.createElement("input");
       fi.type = "file"; fi.accept = "image/*";
       fi.onchange = () => {
         const r = new FileReader();
-        r.onload = () => push(ref(db, "mensagens"), {
-          nick: nickname, uid,
-          tipo: "img", conteudo: r.result,
-          hora: Date.now()
-        });
+        r.onload = () => {
+          push(ref(db, "mensagens"), {
+            nick: nickname, uid,
+            tipo: "img", conteudo: r.result, hora: Date.now()
+          });
+          console.log("[Handler] imgBtn.onclick ◼ end");
+        };
         r.readAsDataURL(fi.files[0]);
       };
       fi.click();
@@ -223,15 +222,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let mediaRecorder, audioChunks, audioBlob, audioUrl;
 
     audioBtn.onclick = () => {
+      console.log("[Handler] audioBtn.onclick ▶ start");
       audioModal.hidden = false; audioModal.classList.add("show");
+      console.log("[Handler] áudio modal aberto");
       audioChunks = [];
       recordBtn.disabled = false;
       stopBtn.disabled = playBtn.disabled = sendAudioBtn.disabled = true;
     };
 
     recordBtn.onclick = () => {
+      console.log("[Áudio] recordBtn.onclick disparado");
       navigator.mediaDevices.getUserMedia({ audio: true })
         .then(stream => {
+          console.log("[Áudio] mediaDevices.getUserMedia ok");
           mediaRecorder = new MediaRecorder(stream);
           mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
           mediaRecorder.onstop = () => {
@@ -240,32 +243,33 @@ document.addEventListener('DOMContentLoaded', () => {
             playBtn.disabled = sendAudioBtn.disabled = false;
           };
           mediaRecorder.start();
-          recordBtn.disabled = true;
-          stopBtn.disabled = false;
+          recordBtn.disabled = true; stopBtn.disabled = false;
         })
         .catch(err => {
-          console.error("Erro no microfone:", err);
+          console.error("[Áudio] erro no getUserMedia:", err);
           alert("Não foi possível acessar microfone.");
         });
     };
 
     stopBtn.onclick = () => {
+      console.log("[Áudio] stopBtn.onclick disparado");
       if (mediaRecorder) mediaRecorder.stop();
       stopBtn.disabled = true;
     };
 
     playBtn.onclick = () => {
+      console.log("[Áudio] playBtn.onclick disparado");
       if (audioUrl) new Audio(audioUrl).play();
     };
 
     sendAudioBtn.onclick = () => {
+      console.log("[Áudio] sendAudioBtn.onclick disparado");
       if (!audioBlob) return;
       const reader = new FileReader();
       reader.onloadend = () => {
         push(ref(db, "mensagens"), {
           nick: nickname, uid,
-          tipo: "audio", conteudo: reader.result,
-          hora: Date.now()
+          tipo: "audio", conteudo: reader.result, hora: Date.now()
         });
         audioModal.hidden = true; audioModal.classList.remove("show");
       };
@@ -273,6 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     cancelAudioBtn.onclick = () => {
+      console.log("[Áudio] cancelAudioBtn.onclick disparado");
       audioModal.hidden = true; audioModal.classList.remove("show");
       if (mediaRecorder && mediaRecorder.state !== "inactive") {
         mediaRecorder.stop();
@@ -280,22 +285,26 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     audioModal.onclick = e => {
-      if (e.target === audioModal) cancelAudioBtn.onclick();
+      if (e.target === audioModal) {
+        console.log("[Áudio] audioModal.onclick fechar modal");
+        cancelAudioBtn.onclick();
+      }
     };
   }
 
   // — Upload áudio existente
   if (uploadAudioBtn) {
     uploadAudioBtn.onclick = () => {
+      console.log("[Handler] uploadAudioBtn.onclick ▶ start");
       const fi = document.createElement("input");
       fi.type = "file"; fi.accept = "audio/*";
       fi.onchange = () => {
         const r = new FileReader();
         r.onload = () => push(ref(db, "mensagens"), {
           nick: nickname, uid,
-          tipo: "audio", conteudo: r.result,
-          hora: Date.now()
+          tipo: "audio", conteudo: r.result, hora: Date.now()
         });
+        console.log("[Handler] uploadAudioBtn.onclick ◼ end");
         r.readAsDataURL(fi.files[0]);
       };
       fi.click();
@@ -305,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // — Alternar rolagem automática
   if (toggleScrollBtn) {
     toggleScrollBtn.onclick = () => {
+      console.log("[Handler] toggleScrollBtn.onclick disparado");
       const chk = document.getElementById("rolagemAuto");
       if (chk) chk.checked = !chk.checked;
     };
@@ -313,6 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // — Logout
   if (logoutBtn && userRef) {
     logoutBtn.onclick = () => {
+      console.log("[Handler] logoutBtn.onclick disparado");
       remove(userRef);
       localStorage.clear();
       window.location.href = "index.html";
